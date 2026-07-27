@@ -3,11 +3,9 @@ import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 const tabs = [
   {key: 'home', label: 'Home', icon: '🏡'},
-  {key: 'about', label: 'About', icon: 'ℹ️'},
   {key: 'tourism', label: 'Tourism', icon: '🌄'},
   {key: 'products', label: 'Products', icon: '🛍️'},
   {key: 'history', label: 'History', icon: '🕰️'},
-  {key: 'contact', label: 'Contact', icon: '📞'},
 ] as const;
 
 type BottomNavProps = {
@@ -16,6 +14,12 @@ type BottomNavProps = {
 };
 
 export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
+
+/**
+ * 
+ * Buttom Nav is a React component that renders a bottom navigation bar for the Syunik App. It displays a set of tabs, each representing a different section of the app (Home, About, Tourism, Products, History). The component highlights the currently active tab and allows users to switch between tabs by pressing them. It accepts two props: activeTab, which indicates the currently selected tab, and onTabChange, a callback function that is called when a user selects a different tab.
+ */
+
   return (
     <View style={styles.container}>
       {tabs.map(tab => {

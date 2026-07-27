@@ -20,7 +20,7 @@ export function HomeScreen({contentContainerStyle}: HomeScreenProps) {
         source={require('../assets/images/syunik_view.png')}
         style={styles.heroImage}
       />
-      <Text style={styles.title}>Syunik App</Text>
+      <Text style={styles.title}>Syunik Landscape</Text>
       <Text style={styles.subtitle}>
         Discover the beauty, history, and spirit of Syunik.
       </Text>
@@ -38,16 +38,6 @@ export function HomeScreen({contentContainerStyle}: HomeScreenProps) {
       </View>
 
       <View style={styles.cardRow}>
-        <View style={styles.card}>
-          <Image
-            source={require('../assets/images/goris_city.png')}
-            style={styles.cardImage}
-          />
-          <Text style={styles.cardTitle}>Goris</Text>
-          <Text style={styles.cardText}>
-            A historic city surrounded by dramatic cliffs and warm hospitality.
-          </Text>
-        </View>
 
         <View style={styles.card}>
           <Image
@@ -56,11 +46,25 @@ export function HomeScreen({contentContainerStyle}: HomeScreenProps) {
           />
           <Text style={styles.cardTitle}>Kapan</Text>
           <Text style={styles.cardText}>
-            A lively gateway to valleys, rivers, and beautiful mountain routes.
+            The regional center of Syunik, located at the foot of Mount Khustup.
           </Text>
         </View>
+
+        <View style={styles.card}>
+          <Image
+            source={require('../assets/images/goris_city.png')}
+            style={styles.cardImage}
+          />
+          <Text style={styles.cardTitle}>Goris</Text>
+          <Text style={styles.cardText}>
+            A city with unique architectural style, famous for its caves.
+          </Text>
+        </View>
+
+        
       </View>
 
+     
       <View style={styles.cardRow}>
         <View style={styles.card}>
           <Image
@@ -69,21 +73,47 @@ export function HomeScreen({contentContainerStyle}: HomeScreenProps) {
           />
           <Text style={styles.cardTitle}>Sisian</Text>
           <Text style={styles.cardText}>
-            Ancient heritage and peaceful landscapes in the heart of Syunik.
+            Located on the banks of the Vorotan River, with a rich history.
           </Text>
         </View>
 
         <View style={styles.card}>
           <Image
-            source={require('../assets/images/syunik_landscape.png')}
+            source={require('../assets/images/meghri_city.png')}
             style={styles.cardImage}
           />
-          <Text style={styles.cardTitle}>Nature</Text>
+          <Text style={styles.cardTitle}>Meghri</Text>
           <Text style={styles.cardText}>
-            Endless views of mountains, forests, and unforgettable scenery.
+            Armenia's southernmost city with a mild climate.
           </Text>
         </View>
       </View>
+
+      <View style={styles.cardRow}>
+        <View style={styles.card}>
+          <Image
+            source={require('../assets/images/qajaran_city.png')}
+            style={styles.cardImage}
+          />
+          <Text style={styles.cardTitle}>Qajaran</Text>
+          <Text style={styles.cardText}>
+            Industrial city in Eastern Syunik, known for mining.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Image
+            source={require('../assets/images/agarak_city.png')}
+            style={styles.cardImage}
+          />
+          <Text style={styles.cardTitle}>Agarak</Text>
+          <Text style={styles.cardText}>
+            Mining city of Syunik, famous for molybdenum and copper mines.
+          </Text>
+        </View>
+      </View>
+
+
     </ScrollView>
   );
 }

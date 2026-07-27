@@ -6,7 +6,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 type AboutUsScreenProps = {
   onBack: () => void;
@@ -21,8 +20,6 @@ export function AboutUsScreen({onBack, onOpenTourism}: AboutUsScreenProps) {
      * Props:
      */
 
-
-  const safeAreaInsets = useSafeAreaInsets();
 
   if (!onBack || !onOpenTourism) {
     throw new Error('onBack and onOpenTourism props are required for AboutUsScreen');

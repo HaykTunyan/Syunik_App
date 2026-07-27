@@ -22,25 +22,11 @@ type ProductItem = {
 
 const products: ProductItem[] = [
   {
-    name: 'Syunik Heritage T-Shirt',
-    price: '$24',
-    size: 'S / M / L / XL',
-    description: 'A soft cotton shirt featuring the landscapes and spirit of Syunik.',
-    image: require('../assets/images/syunik_view.png'),
-  },
-  {
-    name: 'Mountain Memory Hoodie',
-    price: '$39',
-    size: 'M / L / XL',
-    description: 'A cozy hoodie designed for cool evenings and scenic trips.',
-    image: require('../assets/images/syunik_landscape.png'),
-  },
-  {
     name: 'Cultural Print Cap',
     price: '$16',
     size: 'One Size',
     description: 'A casual cap inspired by the heritage and colors of the region.',
-    image: require('../assets/images/Khustup-front.jpg'),
+    image: require('../assets/images/products/Khustup-front.jpg'),
   },
 ];
 
@@ -53,13 +39,14 @@ export function ProductsScreen({onBack}: ProductsScreenProps) {
      * - onBack: A function that is called when the back button is pressed. This allows the parent component to handle navigation back to the previous screen.
      */
 
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
         <Pressable style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>← Back</Text>
         </Pressable>
+        </View>
 
         <Text style={styles.title}>Our Products</Text>
         <Text style={styles.body}>

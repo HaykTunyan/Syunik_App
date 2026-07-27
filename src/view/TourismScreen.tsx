@@ -7,6 +7,7 @@ import {
   View,
   Pressable,
 } from 'react-native';
+import {HeaderBack} from '../components/HeaderBack';
 
 type TourismScreenProps = {
   onBack: () => void;
@@ -76,9 +77,7 @@ export function TourismScreen({onBack}: TourismScreenProps) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Pressable style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backButtonText}>← Back</Text>
-        </Pressable>
+            <HeaderBack onBack={onBack} />
 
         <Text style={styles.title}>Tourism in Syunik</Text>
         <Text style={styles.body}>

@@ -1,8 +1,15 @@
 import React, {useState} from 'react';
 import {StatusBar, StyleSheet, useColorScheme, View} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+
+import {createStackNavigator, type StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
-import {AppHeader} from './components/AppHeader';
+import {AppHeader, type AppScreen} from './components/AppHeader';
+
+// import TabNavigator from './navigation/TabNavigator';
+
 import {BottomNav} from './components/BottomNav';
+import {Sidebar} from './components/Sidebar';
 import {AboutUsScreen} from './view/AboutUsScreen';
 import {ContactUsScreen} from './view/ContactUsScreen';
 import {HistoryScreen} from './view/HistoryScreen';
@@ -10,58 +17,142 @@ import {HomeScreen} from './view/HomeScreen';
 import {TourismScreen} from './view/TourismScreen';
 import {ProductsScreen} from './view/ProductsScreen';
 
+type RootStackParamList = {
+  Home: undefined;
+  About: undefined;
+  History: undefined;
+  Contact: undefined;
+  Tourism: undefined;
+  Products: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
+
+const routeNameMap: Record<AppScreen, keyof RootStackParamList> = {
+  home: 'Home',
+  about: 'About',
+  history: 'History',
+  contact: 'Contact',
+  tourism: 'Tourism',
+  products: 'Products',
+};
+
+type AppRouteProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
+};
+
 function App() {
-
-  /**
-   * App is the main entry point of the Syunik App. It sets up the overall structure of the application, including the status bar, safe area handling, and navigation between different screens. The component uses the useState hook to manage the current active screen and renders the appropriate screen based on user interaction with the bottom navigation bar.
-   * 
-   * The App component is wrapped in a SafeAreaProvider to ensure that content is displayed correctly on devices with notches or other screen insets. It also uses the useColorScheme hook to determine the current color scheme (light or dark) and adjusts the status bar style accordingly.
-   */
-
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const [screen, setScreen] = useState<'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products'>('home');
+function AppNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Home" component={HomeRoute} />
+      <Stack.Screen name="About" component={AboutRoute} />
+      <Stack.Screen name="History" component={HistoryRoute} />
+      <Stack.Screen name="Contact" component={ContactRoute} />
+      <Stack.Screen name="Tourism" component={TourismRoute} />
+      <Stack.Screen name="Products" component={ProductsRoute} />
+    </Stack.Navigator>
+  );
+}
 
-  const renderScreen = () => {
-    switch (screen) {
-      case 'about':
-        return (
-          <AboutUsScreen
-            onBack={() => setScreen('home')}
-            onOpenTourism={() => setScreen('tourism')}
-          />
-        );
-      case 'history':
-        return <HistoryScreen onBack={() => setScreen('home')} />;
-      case 'contact':
-        return <ContactUsScreen onBack={() => setScreen('home')} />;
-      case 'tourism':
-        return <TourismScreen onBack={() => setScreen('home')} />;
-      case 'products':
-        return <ProductsScreen onBack={() => setScreen('home')} />;
-      default:
-        return <HomeScreen contentContainerStyle={styles.contentContainer} />;
-    }
+type AppShellProps = {
+  activeScreen: AppScreen;
+  navigation: StackNavigationProp<RootStackParamList>;
+  children: React.ReactNode;
+};
+
+function AppShell({activeScreen, navigation, children}: AppShellProps) {
+  const safeAreaInsets = useSafeAreaInsets();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const navigateTo = (nextScreen: AppScreen) => {
+    navigation.navigate(routeNameMap[nextScreen]);
   };
 
   return (
-    <View style={styles.containerMain}>
-      <AppHeader />
-      <View style={[styles.screenArea, {paddingTop: safeAreaInsets.top}]}>
-        {renderScreen()}
+    <View style={[styles.screenArea, {paddingTop: safeAreaInsets.top}]}> 
+      <View style={styles.containerMain}>
+        <AppHeader activeScreen={activeScreen} onOpenMenu={() => setIsSidebarOpen(true)} />
+        <View style={styles.contentWrapper}>{children}</View>
+
+        {/* <TabNavigator /> */}
+        <BottomNav activeTab={activeScreen} onTabChange={navigateTo} />
+
+        
+        <Sidebar
+          isOpen={isSidebarOpen}
+          activeScreen={activeScreen}
+          onClose={() => setIsSidebarOpen(false)}
+          onSelectScreen={(nextScreen) => {
+            navigateTo(nextScreen);
+            setIsSidebarOpen(false);
+          }}
+        />
       </View>
-      <BottomNav activeTab={screen} onTabChange={setScreen} />
     </View>
+  );
+}
+
+function HomeRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell activeScreen="home" navigation={navigation}>
+      <HomeScreen contentContainerStyle={styles.contentContainer} />
+    </AppShell>
+  );
+}
+
+function AboutRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell activeScreen="about" navigation={navigation}>
+      <AboutUsScreen
+        onBack={() => navigation.navigate('Home')}
+        onOpenTourism={() => navigation.navigate('Tourism')}
+      />
+    </AppShell>
+  );
+}
+
+function HistoryRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell activeScreen="history" navigation={navigation}>
+      <HistoryScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function ContactRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell activeScreen="contact" navigation={navigation}>
+      <ContactUsScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function TourismRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell activeScreen="tourism" navigation={navigation}>
+      <TourismScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function ProductsRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell activeScreen="products" navigation={navigation}>
+      <ProductsScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
   );
 }
 
@@ -69,15 +160,17 @@ const styles = StyleSheet.create({
   containerMain: {
     flex: 1,
     backgroundColor: '#f6efe6',
-    paddingTop: 60,
   },
   screenArea: {
+    flex: 1,
+  },
+  contentWrapper: {
     flex: 1,
   },
   contentContainer: {
     paddingHorizontal: 20,
     paddingBottom: 28,
-    paddingTop: 12,
+    paddingTop: 16,
   },
 });
 
