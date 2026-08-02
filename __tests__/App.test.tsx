@@ -31,3 +31,14 @@ test('renders the about and history entry points', async () => {
   expect(labels).toContain('About');
   expect(labels).toContain('History');
 });
+
+test('every city has a most visited place, and Goris highlights Tatev', () => {
+  const {citiesData} = require('../src/data/citiesData');
+
+  expect(citiesData.length).toBeGreaterThan(0);
+  for (const city of citiesData) {
+    expect(city.mostVisitedPlace).toBeTruthy();
+  }
+
+  expect(citiesData.find((city: {latinName: string}) => city.latinName === 'Goris')?.mostVisitedPlace).toBe('Tatev Monastery');
+});

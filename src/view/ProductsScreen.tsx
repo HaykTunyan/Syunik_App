@@ -26,7 +26,7 @@ const products: ProductItem[] = [
     price: '$16',
     size: 'One Size',
     description: 'A casual cap inspired by the heritage and colors of the region.',
-    image: require('../assets/images/products/Khustup-front.jpg'),
+    image: require('../assets/images/products/Khustup-shute.jpg'),
   },
 ];
 
@@ -55,7 +55,7 @@ export function ProductsScreen({onBack}: ProductsScreenProps) {
 
         {products.map(product => (
           <View key={product.name} style={styles.card}>
-            <Image source={product.image} style={styles.image} />
+            <Image source={product.image} resizeMode="stretch" style={styles.image} />
             <Text style={styles.productName}>{product.name}</Text>
             <Text style={styles.description}>{product.description}</Text>
             <View style={styles.metaRow}>
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 170,
+    height: 270,
     borderRadius: 12,
     marginBottom: 10,
   },

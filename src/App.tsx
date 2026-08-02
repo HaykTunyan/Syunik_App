@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {StatusBar, StyleSheet, useColorScheme, View} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, type RouteProp} from '@react-navigation/native';
 
 import {createStackNavigator, type StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import {HistoryScreen} from './view/HistoryScreen';
 import {HomeScreen} from './view/HomeScreen';
 import {TourismScreen} from './view/TourismScreen';
 import {ProductsScreen} from './view/ProductsScreen';
+import {CityDetailScreen} from './view/CityDetailsScreen';
 
 type RootStackParamList = {
   Home: undefined;
@@ -24,11 +25,14 @@ type RootStackParamList = {
   Contact: undefined;
   Tourism: undefined;
   Products: undefined;
+  CityDetail: {city: string};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-const routeNameMap: Record<AppScreen, keyof RootStackParamList> = {
+type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products';
+
+const routeNameMap: Record<AppScreen, MainTabRoute> = {
   home: 'Home',
   about: 'About',
   history: 'History',
@@ -39,6 +43,11 @@ const routeNameMap: Record<AppScreen, keyof RootStackParamList> = {
 
 type AppRouteProps = {
   navigation: StackNavigationProp<RootStackParamList>;
+};
+
+type CityDetailRouteProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
+  route: RouteProp<RootStackParamList, 'CityDetail'>;
 };
 
 function App() {
@@ -63,6 +72,7 @@ function AppNavigator() {
       <Stack.Screen name="Contact" component={ContactRoute} />
       <Stack.Screen name="Tourism" component={TourismRoute} />
       <Stack.Screen name="Products" component={ProductsRoute} />
+      <Stack.Screen name="CityDetail" component={CityDetailRoute} />
     </Stack.Navigator>
   );
 }
@@ -82,15 +92,14 @@ function AppShell({activeScreen, navigation, children}: AppShellProps) {
   };
 
   return (
-    <View style={[styles.screenArea, {paddingTop: safeAreaInsets.top}]}> 
+    <View style={[styles.screenArea, {paddingTop: safeAreaInsets.top}]}>
       <View style={styles.containerMain}>
         <AppHeader activeScreen={activeScreen} onOpenMenu={() => setIsSidebarOpen(true)} />
         <View style={styles.contentWrapper}>{children}</View>
 
         {/* <TabNavigator /> */}
-        <BottomNav activeTab={activeScreen} onTabChange={navigateTo} />
+        <BottomNav activeTab={activeScreen as any} onTabChange={navigateTo} />
 
-        
         <Sidebar
           isOpen={isSidebarOpen}
           activeScreen={activeScreen}
@@ -108,7 +117,10 @@ function AppShell({activeScreen, navigation, children}: AppShellProps) {
 function HomeRoute({navigation}: AppRouteProps) {
   return (
     <AppShell activeScreen="home" navigation={navigation}>
-      <HomeScreen contentContainerStyle={styles.contentContainer} />
+      <HomeScreen
+        contentContainerStyle={styles.contentContainer}
+        onSelectCity={(city: string) => navigation.navigate('CityDetail', {city})}
+      />
     </AppShell>
   );
 }
@@ -152,6 +164,14 @@ function ProductsRoute({navigation}: AppRouteProps) {
   return (
     <AppShell activeScreen="products" navigation={navigation}>
       <ProductsScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function CityDetailRoute({navigation, route}: CityDetailRouteProps) {
+  return (
+    <AppShell activeScreen="home" navigation={navigation}>
+      <CityDetailScreen city={route.params.city} onBack={() => navigation.navigate('Home')} />
     </AppShell>
   );
 }

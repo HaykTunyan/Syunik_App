@@ -39,13 +39,14 @@ export function HistoryScreen({ onBack }: HistoryScreenProps) {
         <Text style={styles.subtitle}>
           A history of statehood, faith, and resistance
         </Text>
-
+        
         {/* Section One — Origins */}
         <View style={styles.section}>
           <Text style={styles.eyebrow}>Origins</Text>
 
           <Image
             source={require('../assets/images/syunik_kingdom.png')}
+            resizeMode="stretch"
             style={styles.heroImage}
           />
 
@@ -74,6 +75,7 @@ export function HistoryScreen({ onBack }: HistoryScreenProps) {
 
           <Image
             source={require('../assets/images/syunik_war.png')}
+            resizeMode="stretch"
             style={styles.heroImage}
           />
 
@@ -103,6 +105,7 @@ export function HistoryScreen({ onBack }: HistoryScreenProps) {
 
           <Image
             source={require('../assets/images/garegin_nzhdeh_syunik.png')}
+            resizeMode="stretch"
             style={styles.heroImage}
           />
 
@@ -130,9 +133,6 @@ export function HistoryScreen({ onBack }: HistoryScreenProps) {
 
         <View style={styles.divider} />
 
-        
-
-
         {/* Highlight cards */}
         <View style={styles.cardGroup}>
           <View style={styles.card}>
@@ -144,7 +144,6 @@ export function HistoryScreen({ onBack }: HistoryScreenProps) {
             culture for centuries.
             </Text>
           </View>
-
           
         </View>
       </ScrollView>
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     width: '100%',
-    height: 200,
+    height: 255,
     borderRadius: 18,
     marginBottom: 14,
   },

@@ -26,33 +26,84 @@ export function ContactUsScreen({onBack}: ContactUsScreenProps) {
         <Pressable style={styles.backButton} onPress={onBack}>
           <Text style={styles.backButtonText}>← Back</Text>
         </Pressable>
+
         <Text style={styles.title}>Contact Us</Text>
+
         <Text style={styles.body}>
           We would love to hear from you. Whether you have a question, a travel
           suggestion, or a partnership idea, our team is here to help.
         </Text>
+
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Email</Text>
-          <Pressable onPress={() => Linking.openURL('mailto:info@syunikapp.com')}>
-            <Text style={styles.linkText}>info@syunikapp.com</Text>
-          </Pressable>
+          <View style={styles.infoRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.icon}>✉️</Text>
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.cardTitle}>Email</Text>
+              <Pressable onPress={() => Linking.openURL('mailto:syunikdreams@gmail.com')}>
+                <Text style={styles.linkText}>syunikdreams@gmail.com</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
+
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Phone</Text>
-          <Pressable onPress={() => Linking.openURL('tel:+37477777777')}>
-            <Text style={styles.linkText}>+374 77 777 777</Text>
-          </Pressable>
+          <View style={styles.infoRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.icon}>📞</Text>
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.cardTitle}>Phone</Text>
+              <Pressable onPress={() => Linking.openURL('tel:+374 99 990797')}>
+                <Text style={styles.linkText}>+374 99 990797</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
+
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Address</Text>
-          <Text style={styles.cardText}>
-            12 Heritage Street, Kapan, Syunik, Armenia
-          </Text>
+          <View style={styles.infoRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.icon}>📍</Text>
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.cardTitle}>Address</Text>
+              <Text style={styles.cardText}>
+                Syunik Region, Armenia
+              </Text>
+            </View>
+          </View>
         </View>
+
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Working Hours</Text>
-          <Text style={styles.cardText}>Monday – Friday: 09:00 – 18:00</Text>
-          <Text style={styles.cardText}>Saturday: 10:00 – 16:00</Text>
+          <View style={styles.infoRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.icon}>🕒</Text>
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.cardTitle}>Working Hours</Text>
+              <Text style={styles.cardText}>Monday – Friday: 09:00 – 18:00</Text>
+              <Text style={styles.cardText}>Saturday: 10:00 – 16:00</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.infoRow}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.icon}>📣</Text>
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.cardTitle}>Follow Us</Text>
+              <Pressable onPress={() => Linking.openURL('https://www.facebook.com/syunikapp')}>
+                <Text style={styles.linkText}>TikTok</Text>
+              </Pressable>
+              <Pressable onPress={() => Linking.openURL('https://www.instagram.com/iter_per_oculos_tuos/')}>
+                <Text style={styles.linkText}>Instagram</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -101,6 +152,26 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 3},
     elevation: 3,
   },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#edf4ea',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  icon: {
+    fontSize: 20,
+    lineHeight: 20,
+  },
+  infoContent: {
+    flex: 1,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -116,5 +187,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#4b6b3b',
+    marginBottom: 4,
   },
 });

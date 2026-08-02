@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Pressable,
 } from 'react-native';
 import {HeaderBack} from '../components/HeaderBack';
 
@@ -86,7 +85,7 @@ export function TourismScreen({onBack}: TourismScreenProps) {
 
         {cities.map(city => (
           <View key={city.name} style={styles.card}>
-            <Image source={city.image} style={styles.image} />
+            <Image source={city.image} resizeMode="stretch" style={styles.image} />
             <Text style={styles.cityName}>{city.name}</Text>
             <Text style={styles.description}>{city.description}</Text>
             {city.highlights.map(item => (
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 170,
+    height: 225,
     borderRadius: 12,
     marginBottom: 10,
   },
