@@ -24,26 +24,31 @@ const POPULAR_ATTRACTIONS = [
     id: 'Tatev Monastery',
     image: require('../assets/images/for-travel/tatev.png'),
     location: 'Goris area',
+    city: 'Goris',
   },
   {
-    id: 'Karahunj (Zorats Karer)',
-    image: require('../assets/images/for-travel/karahunj.png'),
-    location: 'Sisian area',
-  },
-  {
-    id: 'Khndzoresk Cave Village',
-    image: require('../assets/images/for-travel/khndzoresk.png'),
+    id: 'Old Khndzoresk',
+    image: require('../assets/images/for-travel/khndzoresk_caves.png'),
     location: 'Goris area',
+    city: 'Goris',
   },
   {
-    id: "Devil's Bridge",
+    id: "Satan's Bridge",
     image: require('../assets/images/for-travel/devils_bridge.png'),
     location: 'Tatev road',
+    city: 'Goris',
   },
   {
-    id: 'Vorotnavanq',
-    image: require('../assets/images/for-travel/vorotnavanq.png'),
-    location: 'Vorotan gorge',
+    id: 'Khustup',
+    image: require('../assets/images/for-travel/khustup.png'),
+    location: 'Kapan area',
+    city: 'Kapan',
+  },
+  {
+    id: 'Zorats Karer',
+    image: require('../assets/images/for-travel/karahunj.png'),
+    location: 'Sisian area',
+    city: 'Sisian',
   },
 ];
 
@@ -80,7 +85,9 @@ function chunkIntoRows<T>(items: T[], size: number): T[][] {
 
 export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProps) {
   const [query, setQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const attractionsOffset = useRef(0);
 
   const filteredCities = useMemo(() => {
@@ -96,6 +103,7 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
   }, [query]);
 
   const cityRows = chunkIntoRows(filteredCities, 2);
+  const showSuggestions = isSearchFocused && query.trim().length > 0;
 
   const totalAttractions = useMemo(
     () => citiesData.reduce((sum, c) => sum + c.attractions.length, 0),
@@ -106,10 +114,18 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
     scrollRef.current?.scrollTo({y, animated: true});
   };
 
+  const selectCity = (city: CityCard) => {
+    searchInputRef.current?.blur();
+    setIsSearchFocused(false);
+    setQuery('');
+    onSelectCity(city.route);
+  };
+
   return (
     <ScrollView
       ref={scrollRef}
       contentContainerStyle={contentContainerStyle}
+      keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}>
       {/* ===== Hero ===== */}
       <View style={styles.hero}>
@@ -147,20 +163,70 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
+            ref={searchInputRef}
             value={query}
             onChangeText={setQuery}
             placeholder="Search cities…"
             placeholderTextColor="#9aa58c"
             style={styles.searchInput}
+            onFocus={() => {
+              setIsSearchFocused(true);
+              scrollRef.current?.scrollTo({y: 0, animated: true});
+            }}
+            onBlur={() => setIsSearchFocused(false)}
+            onSubmitEditing={() => {
+              if (filteredCities.length > 0) {
+                selectCity(filteredCities[0]);
+              }
+            }}
             autoCorrect={false}
             returnKeyType="search"
           />
           {query.length > 0 && (
-            <Pressable onPress={() => setQuery('')} hitSlop={8}>
+            <Pressable
+              accessibilityLabel="Clear city search"
+              accessibilityRole="button"
+              onPress={() => setQuery('')}
+              hitSlop={8}>
               <Text style={styles.searchClear}>✕</Text>
             </Pressable>
           )}
         </View>
+        {showSuggestions && (
+          <View style={styles.suggestions}>
+            {filteredCities.length > 0 ? (
+              <>
+                <Text style={styles.suggestionsLabel}>CITY RESULTS</Text>
+                {filteredCities.map(city => (
+                  <Pressable
+                    key={city.route}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${city.title}`}
+                    onPress={() => selectCity(city)}
+                    style={({pressed}) => [
+                      styles.suggestionItem,
+                      pressed && styles.suggestionItemPressed,
+                    ]}>
+                    <View style={styles.suggestionInitial}>
+                      <Text style={styles.suggestionInitialText}>{city.title.charAt(0)}</Text>
+                    </View>
+                    <View style={styles.suggestionContent}>
+                      <Text style={styles.suggestionTitle}>{city.title}</Text>
+                      <Text numberOfLines={1} style={styles.suggestionDescription}>
+                        {city.description}
+                      </Text>
+                    </View>
+                    <Text style={styles.suggestionArrow}>›</Text>
+                  </Pressable>
+                ))}
+              </>
+            ) : (
+              <View style={styles.noSuggestions}>
+                <Text style={styles.noSuggestionsText}>No matching city in Syunik</Text>
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
       {/* ===== Stats ===== */}
@@ -225,7 +291,7 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
           {POPULAR_ATTRACTIONS.map(place => (
             <Pressable
               key={place.id}
-              onPress={() => onSelectCity(place.location.includes('Sisian') ? 'Sisian' : 'Goris')}
+              onPress={() => onSelectCity(place.city)}
               style={({pressed}) => [styles.attractionCard, pressed && styles.cardPressed]}>
               <Image source={place.image} resizeMode="cover" style={styles.attractionImage} />
               <View style={styles.attractionScrim} />
@@ -371,6 +437,80 @@ const styles = StyleSheet.create({
     color: '#9aa58c',
     fontSize: 15,
     fontWeight: '700',
+  },
+  suggestions: {
+    marginTop: 8,
+    overflow: 'hidden',
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e6dccd',
+    shadowColor: '#243020',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: {width: 0, height: 4},
+    elevation: 4,
+  },
+  suggestionsLabel: {
+    paddingHorizontal: 14,
+    paddingTop: 13,
+    paddingBottom: 7,
+    color: '#879278',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  suggestionItem: {
+    minHeight: 62,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    borderTopWidth: 1,
+    borderTopColor: '#f0eadf',
+  },
+  suggestionItemPressed: {
+    backgroundColor: '#f3f7ee',
+  },
+  suggestionInitial: {
+    width: 36,
+    height: 36,
+    marginRight: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#e8f0e1',
+  },
+  suggestionInitialText: {
+    color: '#4b6b3b',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  suggestionContent: {
+    flex: 1,
+  },
+  suggestionTitle: {
+    color: '#2f3e2f',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  suggestionDescription: {
+    marginTop: 2,
+    color: '#7a8c6d',
+    fontSize: 12,
+  },
+  suggestionArrow: {
+    marginLeft: 8,
+    color: '#789069',
+    fontSize: 24,
+  },
+  noSuggestions: {
+    paddingVertical: 17,
+    paddingHorizontal: 14,
+  },
+  noSuggestionsText: {
+    color: '#7a8c6d',
+    fontSize: 13,
   },
   statsRow: {
     flexDirection: 'row',
@@ -579,4 +719,3 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
 });
-

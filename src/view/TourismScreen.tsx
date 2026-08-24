@@ -19,6 +19,11 @@ type CitySpot = {
   highlights: string[];
 };
 
+type VillageSpot = {
+  name: string;
+  location: string;
+};
+
 const cities: CitySpot[] = [
   {
     name: 'Kapan',
@@ -64,6 +69,14 @@ const cities: CitySpot[] = [
   },
 ];
 
+const topVisitingVillages: VillageSpot[] = [
+  {name: 'Tatev', location: 'Tatev Municipality, Syunik Province'},
+  {name: 'Khndzoresk', location: 'Goris Municipality, Syunik Province'},
+  {name: 'Halidzor', location: 'Tatev Municipality, Syunik Province'},
+  {name: 'Shaki', location: 'Sisian Municipality, Syunik Province'},
+  {name: 'Aghitu', location: 'Sisian Municipality, Syunik Province'},
+];
+
 export function TourismScreen({onBack}: TourismScreenProps) {
 
     /**
@@ -95,6 +108,30 @@ export function TourismScreen({onBack}: TourismScreenProps) {
             ))}
           </View>
         ))}
+
+        <View style={styles.villagesSection}>
+          <View style={styles.villagesHeading}>
+            <View>
+              <Text style={styles.villagesTitle}>Top visiting villages</Text>
+              <Text style={styles.villagesSubtitle}>Small places with unforgettable Syunik stories</Text>
+            </View>
+            <Text style={styles.villagesCount}>{topVisitingVillages.length}</Text>
+          </View>
+
+          <View style={styles.villagesList}>
+            {topVisitingVillages.map((village, index) => (
+              <View key={village.name} style={styles.villageItem}>
+                <View style={styles.villageNumber}>
+                  <Text style={styles.villageNumberText}>{String(index + 1).padStart(2, '0')}</Text>
+                </View>
+                <View style={styles.villageInfo}>
+                  <Text style={styles.villageName}>{village.name}</Text>
+                  <Text style={styles.villageLocation}>📍 {village.location}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -164,5 +201,78 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#4b6b3b',
     marginBottom: 4,
+  },
+  villagesSection: {
+    marginTop: 10,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: '#314a2b',
+  },
+  villagesHeading: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  villagesTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  villagesSubtitle: {
+    maxWidth: 235,
+    marginTop: 4,
+    color: '#cfdbc5',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  villagesCount: {
+    minWidth: 30,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: '#dce9d1',
+    color: '#36542f',
+    fontSize: 13,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  villagesList: {
+    gap: 8,
+  },
+  villageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 13,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  villageNumber: {
+    width: 35,
+    height: 35,
+    marginRight: 11,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#dce9d1',
+  },
+  villageNumberText: {
+    color: '#36542f',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  villageInfo: {
+    flex: 1,
+  },
+  villageName: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  villageLocation: {
+    marginTop: 3,
+    color: '#d4dfca',
+    fontSize: 12,
   },
 });
