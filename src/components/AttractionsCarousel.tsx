@@ -41,7 +41,7 @@ export function AttractionsCarousel({ attractions }: AttractionsCarouselProps) {
             <View style={styles.slide}>
               <Image
                 source={item.image}
-                resizeMode="contain"
+                resizeMode="cover"
                 style={styles.image}
               />
               <View style={styles.caption}>
@@ -67,6 +67,8 @@ const styles = StyleSheet.create({
   image: {
     ...StyleSheet.absoluteFill,
     backgroundColor: '#f4ede2',
+    width: '100%',
+    height: '100%',
   },
   caption: {
     backgroundColor: 'rgba(0, 0, 0, 0.55)',

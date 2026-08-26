@@ -53,6 +53,13 @@ const POPULAR_ATTRACTIONS = [
 ];
 
 function CityCardItem({city, onPress}: {city: CityCard; onPress: () => void}) {
+
+
+  /**
+   * 
+   * CityCardItem is a React component that renders a card representing a city in the Syunik region. It displays the city's image, title, and description. When pressed, it triggers the onPress callback to navigate to the city's detail screen.
+   */
+
   return (
     <Pressable
       onPress={onPress}
@@ -566,7 +573,8 @@ const styles = StyleSheet.create({
     transform: [{scale: 0.98}],
   },
   cardImageWrap: {
-    height: 110,
+    height: 120,
+    width: '100%',
     backgroundColor: '#e8dccb',
   },
   cardImage: {

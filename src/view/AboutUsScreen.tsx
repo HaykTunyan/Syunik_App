@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -36,6 +37,11 @@ export function AboutUsScreen({onBack, onOpenTourism}: AboutUsScreenProps) {
           <Text style={styles.backButtonText}>← Back</Text>
         </Pressable>
 
+        <Image
+          source={require('../assets/images/syunik_landscape.png')}
+          resizeMode="cover"
+          style={styles.heroImage}
+        />
         <Text style={styles.title}>About Us</Text>
         <Text style={styles.body}>
           Syunik App was created to celebrate the cultural richness, natural
@@ -47,14 +53,29 @@ export function AboutUsScreen({onBack, onOpenTourism}: AboutUsScreenProps) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Our Mission</Text>
           <Text style={styles.cardText}>
-            To share inspiring stories, local voices, and memorable destinations
-            in a simple and welcoming experience.
+            To preserve, promote, and share the cultural heritage and natural
+            beauty of the Syunik region through innovative digital storytelling,
+            making it accessible and inspiring for travelers, historians, and
+            adventure seekers worldwide.
           </Text>
         </View>
 
+        <View style={[styles.card, styles.visionCard]}>
+          <Text style={styles.cardTitle}>Our Vision</Text>
+          <Text style={styles.cardText}>
+            To become the most trusted and comprehensive digital platform for
+            Syunik tourism and cultural discovery, empowering local communities
+            while connecting global audiences with the authentic spirit of
+            Armenia's mountain heartland.
+          </Text>
+        </View>
+
+        <View style={styles.villagesSection}>
         <Pressable style={styles.ctaButton} onPress={onOpenTourism}>
-          <Text style={styles.ctaButtonText}>Explore Tourism in Syunik</Text>
+          <Text style={styles.ctaButtonText}>Explore Tourism</Text>
         </Pressable>
+
+        </View>
       </ScrollView>
     </View>
   );
@@ -78,6 +99,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  heroImage: {
+    width: '100%',
+    height: 190,
+    marginBottom: 18,
+    borderRadius: 18,
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -100,6 +127,9 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 3},
     elevation: 3,
   },
+  visionCard: {
+    marginTop: 12,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -117,11 +147,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
-    alignSelf: 'flex-start',
+    // alignSelf: 'flex-start',
   },
   ctaButtonText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '700',
   },
+  villagesSection : {
+    display: 'flex',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  }
 });
