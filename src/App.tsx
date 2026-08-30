@@ -18,8 +18,10 @@ import {TourismScreen} from './view/TourismScreen';
 import {ProductsScreen} from './view/ProductsScreen';
 import {CityDetailScreen} from './view/CityDetailsScreen';
 import {VillageDetailScreen} from './view/VillageDetailScreen';
+import {InitialScreen} from './view/InitialScreen';
 
 type RootStackParamList = {
+  Initial: undefined;
   Home: undefined;
   About: undefined;
   History: undefined;
@@ -68,7 +70,8 @@ function App() {
 
 function AppNavigator() {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator initialRouteName="Initial" screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Initial" component={InitialRoute} />
       <Stack.Screen name="Home" component={HomeRoute} />
       <Stack.Screen name="About" component={AboutRoute} />
       <Stack.Screen name="History" component={HistoryRoute} />
@@ -115,6 +118,21 @@ function AppShell({activeScreen, navigation, children}: AppShellProps) {
         />
       </View>
     </View>
+  );
+}
+
+function InitialRoute({navigation}: AppRouteProps) {
+  return (
+    <InitialScreen
+      onFinish={() => {
+        if ('replace' in navigation && typeof navigation.replace === 'function') {
+          navigation.replace('Home');
+          return;
+        }
+
+        navigation.navigate('Home');
+      }}
+    />
   );
 }
 
