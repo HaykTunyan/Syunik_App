@@ -1,15 +1,18 @@
 import React from 'react';
 import {
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  type ImageSourcePropType,
 } from 'react-native';
 import {HeaderBack} from '../components/HeaderBack';
 
 type TourismScreenProps = {
   onBack: () => void;
+  onSelectVillage: (villageId: string) => void;
 };
 
 type CitySpot = {
@@ -19,9 +22,15 @@ type CitySpot = {
   highlights: string[];
 };
 
-type VillageSpot = {
+export type VillageSpot = {
+  id: string;
   name: string;
   location: string;
+  description: string;
+  road: string;
+  place: string;
+  gallery: ImageSourcePropType[];
+  mostVisitedPlaces: Array<{id: string; title: string; image: ImageSourcePropType}>;
 };
 
 const cities: CitySpot[] = [
@@ -69,27 +78,124 @@ const cities: CitySpot[] = [
   },
 ];
 
-const topVisitingVillages: VillageSpot[] = [
-  {name: 'Tatev', location: 'Tatev Municipality, Syunik Province'},
-  {name: 'Khndzoresk', location: 'Goris Municipality, Syunik Province'},
-  {name: 'Halidzor', location: 'Tatev Municipality, Syunik Province'},
-  {name: 'Shaki', location: 'Sisian Municipality, Syunik Province'},
-  {name: 'Aghitu', location: 'Sisian Municipality, Syunik Province'},
+export const topVisitingVillages: VillageSpot[] = [
+  {
+    id: 'tatev',
+    name: 'Tatev',
+    location: 'Tatev Municipality, Syunik Province',
+    description:
+      'Tatev is one of the most famous historical villages of Syunik, known for the medieval Tatev Monastery, its cableway, and the dramatic mountain panorama surrounding it.',
+    road: 'The road to Tatev follows the mountain route from Goris through the highlands of Syunik, and the Tatev cableway is the most popular way to reach the monastery area.',
+    place: 'Tatev Monastery and the surrounding cliffs are the main landmarks, offering one of the most impressive views in Armenia.',
+    gallery: [
+      require('../assets/images/for-travel/tatev.png'),
+      require('../assets/images/for-travel/hermitage_tatev.png'),
+      require('../assets/images/for-travel/syuniks_gate.png'),
+    ],
+    mostVisitedPlaces: [
+      {id: 'tatev-monastery', title: 'Tatev Monastery', image: require('../assets/images/for-travel/tatev.png')},
+      {id: 'tatev-cableway', title: 'Tatev Cableway viewpoint', image: require('../assets/images/for-travel/hermitage_tatev.png')},
+    ],
+  },
+  {
+    id: 'khndzoresk',
+    name: 'Khndzoresk',
+    location: 'Goris Municipality, Syunik Province',
+    description:
+      'Khndzoresk is one of Syunik’s most distinctive villages, famous for its cave houses, ancient bridge, and dramatic canyon setting that reflects the region’s historical architecture.',
+    road: 'The route from Goris to Khndzoresk leads into the canyon area, where the road climbs through steep slopes and offers panoramic views before reaching the village.',
+    place: 'The cave village and the historical hanging bridge are the village’s signature sights and the main photo points for visitors.',
+    gallery: [
+      require('../assets/images/for-travel/khndzoresk.png'),
+      require('../assets/images/for-travel/khndzoresk_caves.png'),
+      require('../assets/images/for-travel/old_goris.png'),
+    ],
+    mostVisitedPlaces: [
+      {id: 'khndzoresk-bridge', title: 'Khndzoresk Bridge', image: require('../assets/images/for-travel/khndzoresk.png')},
+      {id: 'khndzoresk-caves', title: 'Cave Village', image: require('../assets/images/for-travel/khndzoresk_caves.png')},
+    ],
+  },
+  {
+    id: 'halidzor',
+    name: 'Halidzor',
+    location: 'Tatev Municipality, Syunik Province',
+    description:
+      'Halidzor is a historic village close to Tatev, associated with the military and cultural heritage of Syunik and known for its strategic location in the mountain landscape.',
+    road: 'The road to Halidzor follows the historic Tatev route through the high plateau, with open mountain views and a strong sense of the region’s medieval past.',
+    place: 'Halidzor Fortress and the surrounding valley viewpoints are the village’s most important cultural and scenic highlights.',
+    gallery: [
+      require('../assets/images/for-travel/halidzor.png'),
+      require('../assets/images/for-travel/halizdor-view.png'),
+      require('../assets/images/syunik_view.png'),
+    ],
+    mostVisitedPlaces: [
+      {id: 'halidzor-fortress', title: 'Halidzor fortress view', image: require('../assets/images/for-travel/halidzor.png')},
+      {id: 'halidzor-viliges', title: 'Halidzor Viliges view', image: require('../assets/images/for-travel/halizdor-view.png')},
+    ],
+  },
+  {
+    id: 'shaki',
+    name: 'Shaki',
+    location: 'Sisian Municipality, Syunik Province',
+    description:
+      'Shaki is a picturesque mountain village in the Sisian region, surrounded by greenery and known for its waterfall, rural atmosphere, and close links to the natural landscapes of Syunik.',
+    road: 'The road to Shaki goes through the Sisian highland route, offering open valley views and a quiet rural approach before the village itself.',
+    place: 'The village is best known for the Shaki waterfall and the scenic surroundings that create one of the most peaceful nature stops in the area.',
+    gallery: [
+      require('../assets/images/for-travel/shake.png'),
+      require('../assets/images/for-travel/vorotnaberd.png'),
+      require('../assets/images/moutain.png'),
+    ],
+    mostVisitedPlaces: [
+      {id: 'shaki-waterfall', title: 'Shaki Waterfall', image: require('../assets/images/for-travel/shake.png')},
+      {id: 'vorotnaberd', title: 'Vorotnaberd viewpoint', image: require('../assets/images/for-travel/vorotnaberd.png')},
+    ],
+  },
+
+  {
+    id: 'shikahogh',
+    name: 'Shikahogh',
+    location: 'Kapan Municipality, Syunik Province',
+    description:
+      'Shikahogh is a quiet mountain village in the Kapan region, valued for its green surroundings, peaceful rural life, and traditional Syunik atmosphere.',
+    road: 'The road to Shikahogh follows the Kapan mountain route, where the landscape becomes more rolling and wooded before reaching the village.',
+    place: 'The village’s surrounding valley, local landscape, and nearby viewpoints are the main points of interest for visitors seeking a calm and authentic stop.',
+    gallery: [
+      require('../assets/images/for-travel/old_goris.png'),
+      require('../assets/images/for-travel/syuniks_gate.png'),
+      require('../assets/images/syunik_landscape.png'),
+    ],
+    mostVisitedPlaces: [
+      {id: 'shikahogh-view', title: 'Shikahogh Viewpoint', image: require('../assets/images/for-travel/old_goris.png')},
+      {id: 'shikahogh-valley', title: 'Village Valley', image: require('../assets/images/syunik_landscape.png')},
+    ],
+  },
+  {
+    id: 'Khot',
+    name: 'Khot',
+    location: 'Goris Municipality, Syunik Province',
+    description:
+      'Khot is a traditional mountain village in the Goris area, appreciated for its village atmosphere, local heritage, and the peaceful rural character of the Syunik highlands.',
+    road: 'The road to Khot runs through the Goris mountain corridor, with wide views of the valleys and a gradual approach into the village.',
+    place: 'The village center and nearby viewpoints offer a calm look at local life and the surrounding natural landscape.',
+    gallery: [
+      require('../assets/images/for-travel/khot.png'),
+      require('../assets/images/for-travel/old_goris.png'),
+      require('../assets/images/for-travel/syuniks_gate.png'),
+    ],
+    mostVisitedPlaces: [
+      {id: 'khot-village', title: 'Khot Village Center', image: require('../assets/images/for-travel/khot.png')},
+      {id: 'khot-viewpoint', title: 'Khot Viewpoint', image: require('../assets/images/for-travel/old_goris.png')},
+    ],
+  },
+
 ];
 
-export function TourismScreen({onBack}: TourismScreenProps) {
-
-    /**
-     * TourismScreen is a React component that displays information about tourism in the Syunik region. It includes a back button, a title, a body of text, and a series of cards showcasing different cities with their images, descriptions, and highlights. The component uses a ScrollView to allow users to scroll through the content vertically.
-     * Props:
-     * - onBack: A function that is called when the back button is pressed. This allows the parent component to handle navigation back to the previous screen.
-     * 
-     */
-
+export function TourismScreen({onBack, onSelectVillage}: TourismScreenProps) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
-            <HeaderBack onBack={onBack} />
+        <HeaderBack onBack={onBack} />
 
         <Text style={styles.title}>Tourism in Syunik</Text>
         <Text style={styles.body}>
@@ -120,7 +226,7 @@ export function TourismScreen({onBack}: TourismScreenProps) {
 
           <View style={styles.villagesList}>
             {topVisitingVillages.map((village, index) => (
-              <View key={village.name} style={styles.villageItem}>
+              <Pressable key={village.id} onPress={() => onSelectVillage(village.id)} style={styles.villageItem}>
                 <View style={styles.villageNumber}>
                   <Text style={styles.villageNumberText}>{String(index + 1).padStart(2, '0')}</Text>
                 </View>
@@ -128,7 +234,7 @@ export function TourismScreen({onBack}: TourismScreenProps) {
                   <Text style={styles.villageName}>{village.name}</Text>
                   <Text style={styles.villageLocation}>📍 {village.location}</Text>
                 </View>
-              </View>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -146,15 +252,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 28,
     paddingTop: 16,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 14,
-  },
-  backButtonText: {
-    color: '#4b6b3b',
-    fontSize: 15,
-    fontWeight: '600',
   },
   title: {
     fontSize: 28,

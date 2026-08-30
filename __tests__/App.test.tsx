@@ -20,7 +20,7 @@ jest.mock('@react-navigation/stack', () => ({
   }),
 }));
 
-test('renders the about and history entry points', async () => {
+test('renders the app home screen content', async () => {
   let renderer: ReactTestRenderer.ReactTestRenderer;
 
   await ReactTestRenderer.act(() => {
@@ -28,8 +28,8 @@ test('renders the about and history entry points', async () => {
   });
 
   const labels = renderer!.root.findAllByType(Text).map(node => node.props.children);
-  expect(labels).toContain('About');
-  expect(labels).toContain('History');
+  expect(labels).toContain('Discover Armenia’s soul');
+  expect(labels).toContain('WELCOME TO SYUNIK');
 });
 
 test('every city has a most visited place, and Goris highlights Tatev', () => {
@@ -40,5 +40,17 @@ test('every city has a most visited place, and Goris highlights Tatev', () => {
     expect(city.mostVisitedPlace).toBeTruthy();
   }
 
-  expect(citiesData.find((city: {latinName: string}) => city.latinName === 'Goris')?.mostVisitedPlace).toBe('Tatev Monastery');
+  const gorisPlaces = citiesData.find((city: {latinName: string}) => city.latinName === 'Goris')?.mostVisitedPlace ?? [];
+  expect(gorisPlaces.some((place: {text: string}) => place.text === 'Tatev Monastery')).toBe(true);
+});
+
+test('every top village has a detail card with gallery, road, and most-visited places', () => {
+  const {topVisitingVillages} = require('../src/view/TourismScreen');
+
+  expect(topVisitingVillages.length).toBeGreaterThan(0);
+  for (const village of topVisitingVillages) {
+    expect(village.gallery?.length).toBeGreaterThan(0);
+    expect(village.road).toBeTruthy();
+    expect(village.mostVisitedPlaces?.length).toBeGreaterThan(0);
+  }
 });

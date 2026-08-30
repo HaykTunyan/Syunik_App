@@ -17,6 +17,7 @@ import {HomeScreen} from './view/HomeScreen';
 import {TourismScreen} from './view/TourismScreen';
 import {ProductsScreen} from './view/ProductsScreen';
 import {CityDetailScreen} from './view/CityDetailsScreen';
+import {VillageDetailScreen} from './view/VillageDetailScreen';
 
 type RootStackParamList = {
   Home: undefined;
@@ -26,6 +27,7 @@ type RootStackParamList = {
   Tourism: undefined;
   Products: undefined;
   CityDetail: {city: string};
+  VillageDetail: {village: string};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -43,11 +45,12 @@ const routeNameMap: Record<AppScreen, MainTabRoute> = {
 
 type AppRouteProps = {
   navigation: StackNavigationProp<RootStackParamList>;
+  route?: {params?: {city?: string; village?: string}};
 };
 
 type CityDetailRouteProps = {
   navigation: StackNavigationProp<RootStackParamList>;
-  route: RouteProp<RootStackParamList, 'CityDetail'>;
+  route?: {params?: {city?: string}};
 };
 
 function App() {
@@ -73,6 +76,7 @@ function AppNavigator() {
       <Stack.Screen name="Tourism" component={TourismRoute} />
       <Stack.Screen name="Products" component={ProductsRoute} />
       <Stack.Screen name="CityDetail" component={CityDetailRoute} />
+      <Stack.Screen name="VillageDetail" component={VillageDetailRoute} />
     </Stack.Navigator>
   );
 }
@@ -155,7 +159,10 @@ function ContactRoute({navigation}: AppRouteProps) {
 function TourismRoute({navigation}: AppRouteProps) {
   return (
     <AppShell activeScreen="tourism" navigation={navigation}>
-      <TourismScreen onBack={() => navigation.navigate('Home')} />
+      <TourismScreen
+        onBack={() => navigation.navigate('Home')}
+        onSelectVillage={(village: string) => navigation.navigate('VillageDetail', {village})}
+      />
     </AppShell>
   );
 }
@@ -169,9 +176,21 @@ function ProductsRoute({navigation}: AppRouteProps) {
 }
 
 function CityDetailRoute({navigation, route}: CityDetailRouteProps) {
+  const city = route?.params?.city ?? 'Kapan';
+
   return (
     <AppShell activeScreen="home" navigation={navigation}>
-      <CityDetailScreen city={route.params.city} onBack={() => navigation.navigate('Home')} />
+      <CityDetailScreen city={city} onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function VillageDetailRoute({navigation, route}: {navigation: StackNavigationProp<RootStackParamList>; route?: {params?: {village?: string}}}) {
+  const village = route?.params?.village ?? 'tatev';
+
+  return (
+    <AppShell activeScreen="tourism" navigation={navigation}>
+      <VillageDetailScreen village={village} onBack={() => navigation.navigate('Tourism')} />
     </AppShell>
   );
 }

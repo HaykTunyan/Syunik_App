@@ -2,6 +2,16 @@
 
 require('react-native-gesture-handler/jestSetup');
 
+jest.mock('react-native-reanimated-carousel', () => {
+  const React = require('react');
+  const MockCarousel = () => React.createElement('View');
+
+  return {
+    __esModule: true,
+    default: MockCarousel,
+  };
+});
+
 jest.mock('react-native-safe-area-context', () => {
   const React = require('react');
   const actual = jest.requireActual('react-native-safe-area-context');
