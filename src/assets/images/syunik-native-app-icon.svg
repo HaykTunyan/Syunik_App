@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.92" y2="1">
+      <stop offset="0" stop-color="#210713"/>
+      <stop offset="0.44" stop-color="#741b32"/>
+      <stop offset="1" stop-color="#270818"/>
+    </linearGradient>
+    <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd68b"/>
+      <stop offset="0.32" stop-color="#ed9a55"/>
+      <stop offset="1" stop-color="#a63d37"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#fff0b3"/>
+      <stop offset="0.25" stop-color="#f3bd67"/>
+      <stop offset="0.58" stop-color="#b86b35"/>
+      <stop offset="1" stop-color="#703020"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0.25" y1="0.1" x2="0.78" y2="0.9">
+      <stop offset="0" stop-color="#ffe091"/>
+      <stop offset="0.24" stop-color="#f2bd69"/>
+      <stop offset="0.72" stop-color="#a64e2c"/>
+      <stop offset="1" stop-color="#69221e"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="20%" r="58%">
+      <stop offset="0" stop-color="#ffd98b" stop-opacity=".65"/>
+      <stop offset=".42" stop-color="#ef8550" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#4a1024" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <!-- Full-bleed square is intentional: iOS and Android apply their own masks. -->
+  <rect width="1024" height="1024" fill="url(#sky)"/>
+  <rect width="1024" height="720" fill="url(#halo)"/>
+  <circle cx="520" cy="242" r="124" fill="#ffd785" opacity=".24" filter="url(#glow)"/>
+  <circle cx="520" cy="242" r="63" fill="#ffe1a0"/>
+  <circle cx="520" cy="242" r="48" fill="#fff0bd"/>
+
+  <!-- Layered Syunik mountain range -->
+  <path d="M0 575 92 486l72 35 102-119 97 101 118-161 101 122 99-81 86 113 81-61 86 140v209H0Z" fill="#53142a"/>
+  <path d="M0 648 145 485l75 97 119-162 104 122 105-184 95 142 89-91 109 160 93-71v286H0Z" fill="#7e2436"/>
+  <path d="m145 485 75 97 119-162 24 28-112 210-106-173Zm403-127 95 142 89-91 17 25-120 189-81-265Zm293 211 93-71 10 17-101 168Z" fill="url(#sunset)" opacity=".82"/>
+  <path d="M0 756 154 590l108 111 114-122 137 153 126-129 120 109 105-102 151 146v268H0Z" fill="#3a0c20"/>
+  <path d="M0 815 187 681l98 75 91-55 137 100 126-98 104 78 126-65 155 118v190H0Z" fill="#270818" opacity=".93"/>
+  <path d="M36 775c163-14 259 53 404 19 153-36 270-124 548 8v222H36Z" fill="#1d0714" opacity=".64"/>
+
+  <!-- Eagle, simplified for launcher-size legibility -->
+  <path d="M157 731c91-172 185-253 303-267-38 45-55 92-45 142 23 109 92 162 200 195-159 18-307-9-458-70Z" fill="url(#wing)"/>
+  <path d="M189 720c96-127 177-183 262-205-37 45-45 85-26 120-68 7-139 35-236 85Z" fill="#7b2830" opacity=".82"/>
+  <path d="M326 797c-24-133 11-254 100-335 55-50 131-75 211-55 63 16 107 61 119 111-55-34-110-45-164-32 55 20 104 55 139 105-25 38-62 70-107 88-72 30-141 75-182 146Z" fill="url(#gold)"/>
+  <path d="M400 769c11-112 49-204 114-277 33-37 76-58 126-62-69 51-103 108-102 172 0 71 32 134 85 187-76 11-150 39-223 80Z" fill="#9d482b" opacity=".86"/>
+  <path d="M483 483c33-47 77-68 132-63 60 6 104 38 130 88-54-7-102 8-144 47-38 35-77 45-118 30-19-7-26-22-17-39 8-15 14-29 17-42Z" fill="url(#gold)"/>
+  <path d="M569 487c48-25 98-27 150-9-49 5-89 23-119 56-27 29-61 37-103 25 27-17 51-41 72-72Z" fill="#3d0d1e"/>
+  <path d="M587 483c16-19 39-27 68-24-19 13-35 29-46 49-14-3-25-11-32-24 3 0 7 0 10-1Z" fill="#f9d17a"/>
+  <circle cx="642" cy="459" r="14" fill="#210713"/>
+  <circle cx="647" cy="454" r="4" fill="#fff0bc"/>
+  <path d="M749 497c38 6 75 19 108 41-47 20-89 23-126 10 9-20 15-37 18-51Z" fill="#efb65e"/>
+  <path d="M786 532c27 0 51 3 71 11-31 13-60 16-88 9Z" fill="#7a2930"/>
+  <path d="M479 550c-25 80-18 153 27 218" fill="none" stroke="#ffdd91" stroke-width="11" stroke-linecap="round" opacity=".58"/>
+  <path d="M455 644c50 14 91 42 124 83M443 702c44 8 80 24 109 48" fill="none" stroke="#f0b55f" stroke-width="9" stroke-linecap="round" opacity=".48"/>
+  <path d="M0 913c188-22 311-11 446 14 173 32 343 22 578-10v111H0Z" fill="#16050f" opacity=".54"/>
+</svg>

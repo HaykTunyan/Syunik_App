@@ -44,7 +44,7 @@ export function AboutUsScreen({onBack, onOpenTourism}: AboutUsScreenProps) {
         />
         <Text style={styles.title}>About Us</Text>
         <Text style={styles.body}>
-          Syunik App was created to celebrate the cultural richness, natural
+          Syunik Dreams was created to celebrate the cultural richness, natural
           beauty, and living heritage of Syunik. We aim to make the region more
           accessible to travelers, locals, and anyone curious about Armenia’s
           southern landscapes.

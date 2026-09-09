@@ -1,0 +1,9 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace SyunikApp.xcworkspace -configuration Debug -scheme SyunikApp -destination id=00008110-001E0C8C1A11401E
+
+2026-09-06 18:59:59.624 xcodebuild[17100:167169] Writing error result bundle to /var/folders/l3/cftrm9p90qd6_xlg0500x99c0000gn/T/ResultBundle_2026-06-09_18-59-0059.xcresult
+xcodebuild: error: Timed out waiting for all destinations matching the provided destination specifier to become available
+
+
+	Available destinations for the "SyunikApp" scheme:
+		{ platform:iOS, arch:arm64, id:00008110-001E0C8C1A11401E, name:iPhone_14, error:The developer disk image could not be mounted on this device. }

@@ -40,7 +40,7 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
                 <Text style={styles.brandMarkText}>S</Text>
               </View>
               <View>
-                <Text style={styles.drawerTitle}>Syunik</Text>
+                <Text style={styles.drawerTitle}>Syunik Dreams</Text>
                 <Text style={styles.drawerSubtitle}>Travel companion</Text>
               </View>
             </View>

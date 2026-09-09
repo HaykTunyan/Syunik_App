@@ -35,12 +35,12 @@ export function AppHeader({activeScreen, onOpenMenu}: AppHeaderProps) {
         </Pressable>
         <View>
           <Text style={styles.title}>{screenTitles[activeScreen]}</Text>
-          <Text style={styles.subtitle}>Syunik App</Text>
+          {/* <Text style={styles.subtitle}>Syunik App</Text> */}
         </View>
       </View>
-      <View style={styles.badge}>
+      {/* <View style={styles.badge}>
         <Text style={styles.badgeText}>{screenBadges[activeScreen]}</Text>
-      </View>
+      </View> */}
     </View>
   );
 }
