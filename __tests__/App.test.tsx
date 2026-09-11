@@ -9,6 +9,10 @@ import App from '../src/App';
 
 jest.mock('@react-navigation/native', () => ({
   NavigationContainer: ({children}: {children: React.ReactNode}) => children,
+  createNavigationContainerRef: () => ({
+    isReady: () => false,
+    navigate: jest.fn(),
+  }),
 }));
 
 jest.mock('@react-navigation/stack', () => ({

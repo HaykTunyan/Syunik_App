@@ -5,12 +5,13 @@ const tabs = [
   {key: 'home', label: 'Home', icon: '🏡'},
   {key: 'tourism', label: 'Tourism', icon: '🌄'},
   {key: 'products', label: 'Products', icon: '🛍️'},
+  {key: 'roads', label: 'Roads', icon: '🛣️'},
   {key: 'history', label: 'History', icon: '🕰️'},
 ] as const;
 
 type BottomNavProps = {
-  activeTab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products';
-  onTabChange: (tab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products') => void;
+  activeTab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads';
+  onTabChange: (tab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads') => void;
 };
 
 export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
@@ -29,7 +30,7 @@ export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
           <Pressable
             key={tab.key}
             style={[styles.tab, isActive && styles.activeTab]}
-            onPress={() => onTabChange(tab.key as 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products')}>
+            onPress={() => onTabChange(tab.key as 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads')}>
             <Text style={styles.icon}>{tab.icon}</Text>
             <Text style={isActive ? styles.activeText : styles.inactiveText}>
               {tab.label}

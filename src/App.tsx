@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StatusBar, StyleSheet, useColorScheme, View} from 'react-native';
-import {NavigationContainer, type RouteProp} from '@react-navigation/native';
+import {createNavigationContainerRef, NavigationContainer} from '@react-navigation/native';
 
 import {createStackNavigator, type StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -18,7 +18,14 @@ import {TourismScreen} from './view/TourismScreen';
 import {ProductsScreen} from './view/ProductsScreen';
 import {CityDetailScreen} from './view/CityDetailsScreen';
 import {VillageDetailScreen} from './view/VillageDetailScreen';
+import {RoadScreen} from './view/RoadScreen';
 import {InitialScreen} from './view/InitialScreen';
+import {
+  VoiceAssistantProvider,
+  useVoiceAssistant,
+  type AssistantPageContext,
+} from './components/VoiceAssistant';
+import type {AssistantDestination} from './data/assistantLocations';
 
 type RootStackParamList = {
   Initial: undefined;
@@ -28,13 +35,15 @@ type RootStackParamList = {
   Contact: undefined;
   Tourism: undefined;
   Products: undefined;
+  Roads: undefined;
   CityDetail: {city: string};
   VillageDetail: {village: string};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
-type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products';
+type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products' | 'Roads';
 
 const routeNameMap: Record<AppScreen, MainTabRoute> = {
   home: 'Home',
@@ -43,6 +52,7 @@ const routeNameMap: Record<AppScreen, MainTabRoute> = {
   contact: 'Contact',
   tourism: 'Tourism',
   products: 'Products',
+  roads: 'Roads',
 };
 
 type AppRouteProps = {
@@ -61,11 +71,26 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <NavigationContainer>
-        <AppNavigator />
+      <NavigationContainer ref={navigationRef}>
+        <VoiceAssistantProvider onNavigate={navigateToAssistantDestination}>
+          <AppNavigator />
+        </VoiceAssistantProvider>
       </NavigationContainer>
     </SafeAreaProvider>
   );
+}
+
+function navigateToAssistantDestination(destination: AssistantDestination) {
+  if (!navigationRef.isReady()) {
+    return;
+  }
+
+  if (destination.kind === 'city') {
+    navigationRef.navigate('CityDetail', {city: destination.id});
+    return;
+  }
+
+  navigationRef.navigate('VillageDetail', {village: destination.id});
 }
 
 function AppNavigator() {
@@ -78,6 +103,7 @@ function AppNavigator() {
       <Stack.Screen name="Contact" component={ContactRoute} />
       <Stack.Screen name="Tourism" component={TourismRoute} />
       <Stack.Screen name="Products" component={ProductsRoute} />
+      <Stack.Screen name="Roads" component={RoadsRoute} />
       <Stack.Screen name="CityDetail" component={CityDetailRoute} />
       <Stack.Screen name="VillageDetail" component={VillageDetailRoute} />
     </Stack.Navigator>
@@ -88,11 +114,21 @@ type AppShellProps = {
   activeScreen: AppScreen;
   navigation: StackNavigationProp<RootStackParamList>;
   children: React.ReactNode;
+  assistantContext?: AssistantPageContext;
 };
 
-function AppShell({activeScreen, navigation, children}: AppShellProps) {
+function AppShell({activeScreen, navigation, children, assistantContext}: AppShellProps) {
   const safeAreaInsets = useSafeAreaInsets();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const {openAssistant, updatePageContext} = useVoiceAssistant();
+  const context = assistantContext ?? {
+    page: activeScreen,
+    title: `${activeScreen.charAt(0).toUpperCase()}${activeScreen.slice(1)} in Syunik Dreams`,
+  };
+
+  useEffect(() => {
+    updatePageContext(context);
+  }, [context.detail, context.page, context.title, updatePageContext]);
 
   const navigateTo = (nextScreen: AppScreen) => {
     navigation.navigate(routeNameMap[nextScreen]);
@@ -101,7 +137,11 @@ function AppShell({activeScreen, navigation, children}: AppShellProps) {
   return (
     <View style={[styles.screenArea, {paddingTop: safeAreaInsets.top}]}>
       <View style={styles.containerMain}>
-        <AppHeader activeScreen={activeScreen} onOpenMenu={() => setIsSidebarOpen(true)} />
+        <AppHeader
+          activeScreen={activeScreen}
+          onOpenMenu={() => setIsSidebarOpen(true)}
+          onOpenAssistant={() => openAssistant(context)}
+        />
         <View style={styles.contentWrapper}>{children}</View>
 
         {/* <TabNavigator /> */}
@@ -193,11 +233,33 @@ function ProductsRoute({navigation}: AppRouteProps) {
   );
 }
 
+function RoadsRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell
+      activeScreen="roads"
+      navigation={navigation}
+      assistantContext={{
+        page: 'roads',
+        title: 'Roads across Syunik',
+        detail: 'Regional map, mountain routes, road distances, and travel guidance across Syunik.',
+      }}>
+      <RoadScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
 function CityDetailRoute({navigation, route}: CityDetailRouteProps) {
   const city = route?.params?.city ?? 'Kapan';
 
   return (
-    <AppShell activeScreen="home" navigation={navigation}>
+    <AppShell
+      activeScreen="home"
+      navigation={navigation}
+      assistantContext={{
+        page: 'city-detail',
+        title: `${city} city details`,
+        detail: `City information, attractions, landmarks, and visitor highlights for ${city}.`,
+      }}>
       <CityDetailScreen city={city} onBack={() => navigation.navigate('Home')} />
     </AppShell>
   );
@@ -207,7 +269,14 @@ function VillageDetailRoute({navigation, route}: {navigation: StackNavigationPro
   const village = route?.params?.village ?? 'tatev';
 
   return (
-    <AppShell activeScreen="tourism" navigation={navigation}>
+    <AppShell
+      activeScreen="tourism"
+      navigation={navigation}
+      assistantContext={{
+        page: 'village-detail',
+        title: `${village} destination details`,
+        detail: `Road, place information, gallery, and visitor highlights for ${village}.`,
+      }}>
       <VillageDetailScreen village={village} onBack={() => navigation.navigate('Tourism')} />
     </AppShell>
   );

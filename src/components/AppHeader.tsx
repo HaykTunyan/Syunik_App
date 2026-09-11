@@ -1,11 +1,12 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
-export type AppScreen = 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products';
+export type AppScreen = 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads';
 
 type AppHeaderProps = {
   activeScreen: AppScreen;
   onOpenMenu: () => void;
+  onOpenAssistant: () => void;
 };
 
 const screenTitles: Record<AppScreen, string> = {
@@ -15,6 +16,7 @@ const screenTitles: Record<AppScreen, string> = {
   contact: 'Contact Us',
   tourism: 'Tourism Highlights',
   products: 'Local Products',
+  roads: 'Roads of Syunik',
 };
 
 const screenBadges: Record<AppScreen, string> = {
@@ -24,9 +26,10 @@ const screenBadges: Record<AppScreen, string> = {
   contact: 'Reach out',
   tourism: 'Visit',
   products: 'Shop',
+  roads: 'Navigate',
 };
 
-export function AppHeader({activeScreen, onOpenMenu}: AppHeaderProps) {
+export function AppHeader({activeScreen, onOpenMenu, onOpenAssistant}: AppHeaderProps) {
   return (
     <View style={styles.header}>
       <View style={styles.leftSection}>
@@ -38,9 +41,13 @@ export function AppHeader({activeScreen, onOpenMenu}: AppHeaderProps) {
           {/* <Text style={styles.subtitle}>Syunik App</Text> */}
         </View>
       </View>
-      {/* <View style={styles.badge}>
-        <Text style={styles.badgeText}>{screenBadges[activeScreen]}</Text>
-      </View> */}
+      <Pressable
+        onPress={onOpenAssistant}
+        style={styles.assistantButton}
+        accessibilityRole="button"
+        accessibilityLabel="Open AI tourist assistant">
+        <Text style={styles.assistantIcon}>🎙</Text>
+      </Pressable>
     </View>
   );
 }
@@ -81,6 +88,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#2f3e2f',
+  },
+  assistantButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: '#e5f0df',
+    borderColor: '#cddfc5',
+    borderWidth: 1,
+  },
+  assistantIcon: {
+    fontSize: 19,
   },
   subtitle: {
     fontSize: 12,

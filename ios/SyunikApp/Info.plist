@@ -34,7 +34,9 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Syunik Dreams uses your location to show nearby landmarks and routes on the map.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Syunik Dreams uses the microphone so you can speak with the tourist assistant.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

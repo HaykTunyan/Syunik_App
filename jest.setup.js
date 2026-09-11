@@ -2,6 +2,25 @@
 
 require('react-native-gesture-handler/jestSetup');
 
+// Voice sessions depend on native WebRTC/audio modules, which are exercised on
+// device builds rather than the JS renderer used by this test suite.
+jest.mock('@elevenlabs/react-native', () => {
+  const React = require('react');
+
+  return {
+    ConversationProvider: ({children}) => children,
+    useConversation: () => ({
+      status: 'disconnected',
+      isSpeaking: false,
+      isMuted: false,
+      startSession: jest.fn(),
+      endSession: jest.fn(),
+      setMuted: jest.fn(),
+      sendContextualUpdate: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('react-native-reanimated-carousel', () => {
   const React = require('react');
   const MockCarousel = () => React.createElement('View');

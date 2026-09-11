@@ -52,8 +52,9 @@ export default function TabNavigator() {
 
         <Tab.Screen name="Tourism">
           {({ navigation }) => (
-            <TourismScreen
+          <TourismScreen
               onBack={() => navigation.goBack()}
+              onSelectVillage={() => undefined}
             />
           )}
         </Tab.Screen>

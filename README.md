@@ -95,3 +95,16 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+## ElevenLabs voice assistant setup
+
+The AI tourist assistant is available from the microphone button in the app header. Before using it, set the public Agent ID from your ElevenLabs Agent in [`src/config/elevenLabs.ts`](src/config/elevenLabs.ts).
+
+In the Agent dashboard, add these client tools with the exact names shown below. They let the agent read the visitor's current screen and open the appropriate Syunik Dreams destination while it continues speaking.
+
+- `get_current_page_context` — no parameters; returns the page the visitor is viewing.
+- `navigate_to_syunik_location` — accepts a `destination` string; call it for cities, villages, roads, landmarks, and historical locations in Syunik.
+
+Suggested agent instruction: "You are the Syunik Dreams tourist guide. Answer naturally and concisely about Syunik. Before discussing a supported place, road, landmark, route, or historical destination, call `navigate_to_syunik_location` with its name. Use `get_current_page_context` for follow-up questions about the current page."
+
+The app also resolves recognized visitor transcripts locally, so destination navigation remains reliable when the agent answers without making the navigation tool call. Native microphone permission is already declared for Android and iOS. After installing the new native dependencies, run `bundle exec pod install` in `ios` before building iOS.

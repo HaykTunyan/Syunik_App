@@ -12,6 +12,13 @@ import {
 import { AttractionsCarousel } from '../components/AttractionsCarousel';
 import { citiesData } from '../data/citiesData';
 
+const MAP_BOUNDS = {
+  minLatitude: 38.84,
+  maxLatitude: 39.56,
+  minLongitude: 45.98,
+  maxLongitude: 46.46,
+};
+
 type CityDetailScreenProps = {
   city: string;
   onBack: () => void;
@@ -47,6 +54,49 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       />
       <Text style={styles.title}>{cityData.latinName}</Text>
       <Text style={styles.description}>{cityData.description}</Text>
+
+      <View style={styles.mapCard}>
+        <View style={styles.mapHeader}>
+          <View>
+            <Text style={styles.mapEyebrow}>EXPLORE THE REGION</Text>
+            <Text style={styles.infoTitle}>Syunik city map</Text>
+          </View>
+          <Text style={styles.mapCompass}>N ↑</Text>
+        </View>
+        <View style={styles.mapSurface}>
+          <View style={[styles.mapContour, styles.mapContourOne]} />
+          <View style={[styles.mapContour, styles.mapContourTwo]} />
+          <View style={[styles.mapContour, styles.mapContourThree]} />
+          {citiesData.map(city => {
+            const left = ((city.coords[1] - MAP_BOUNDS.minLongitude) /
+              (MAP_BOUNDS.maxLongitude - MAP_BOUNDS.minLongitude)) * 100;
+            const top = ((MAP_BOUNDS.maxLatitude - city.coords[0]) /
+              (MAP_BOUNDS.maxLatitude - MAP_BOUNDS.minLatitude)) * 100;
+            const isSelected = city.latinName === cityData.latinName;
+
+            return (
+              <View
+                key={city.id}
+                style={[styles.mapPin, {left: `${left}%`, top: `${top}%`}]}
+                accessibilityLabel={`${city.latinName} city on Syunik map`}>
+                <View style={[styles.pinDot, isSelected && styles.pinDotSelected]} />
+                <Text style={[styles.pinLabel, isSelected && styles.pinLabelSelected]}>
+                  {city.latinName}
+                </Text>
+              </View>
+            );
+          })}
+          <Text style={styles.mapRegionLabel}>SYUNIK</Text>
+          <Text style={styles.mapRiverLabel}>VOROTAN</Text>
+        </View>
+        <View style={styles.mapLegend}>
+          <View style={[styles.legendDot, styles.legendDotSelected]} />
+          <Text style={styles.legendText}>{cityData.latinName}</Text>
+          <View style={styles.legendDivider} />
+          <View style={styles.legendDot} />
+          <Text style={styles.legendText}>Other cities</Text>
+        </View>
+      </View>
 
       <View style={styles.infoCard}>
         <Text style={styles.infoTitle}>Most visited place</Text>
@@ -120,6 +170,140 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#4d4d4d',
     marginBottom: 18,
+  },
+  mapCard: {
+    backgroundColor: '#eef3e9',
+    borderRadius: 18,
+    borderColor: '#d8e3d1',
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 14,
+  },
+  mapHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  mapEyebrow: {
+    color: '#71866a',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: 3,
+  },
+  mapCompass: {
+    color: '#61785b',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  mapSurface: {
+    height: 214,
+    overflow: 'hidden',
+    position: 'relative',
+    borderRadius: 14,
+    backgroundColor: '#dbe8d4',
+    borderWidth: 1,
+    borderColor: '#c8d9bf',
+  },
+  mapContour: {
+    position: 'absolute',
+    borderColor: '#c2d6b9',
+    borderWidth: 1,
+    borderRadius: 120,
+    transform: [{rotate: '-22deg'}],
+  },
+  mapContourOne: {
+    width: 320,
+    height: 110,
+    top: 28,
+    left: -70,
+  },
+  mapContourTwo: {
+    width: 350,
+    height: 135,
+    top: 88,
+    left: 48,
+  },
+  mapContourThree: {
+    width: 240,
+    height: 90,
+    top: -12,
+    left: 118,
+  },
+  mapPin: {
+    position: 'absolute',
+    alignItems: 'center',
+    transform: [{translateX: -8}, {translateY: -8}],
+  },
+  pinDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#6c8b61',
+    borderWidth: 2,
+    borderColor: '#f4f8f1',
+  },
+  pinDotSelected: {
+    width: 17,
+    height: 17,
+    borderRadius: 9,
+    backgroundColor: '#c16b48',
+  },
+  pinLabel: {
+    marginTop: 3,
+    color: '#50664a',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  pinLabelSelected: {
+    color: '#9b4e32',
+    fontSize: 11,
+  },
+  mapRegionLabel: {
+    position: 'absolute',
+    right: 16,
+    bottom: 17,
+    color: '#a8c09f',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: 3,
+  },
+  mapRiverLabel: {
+    position: 'absolute',
+    left: 16,
+    bottom: 16,
+    color: '#76999a',
+    fontSize: 9,
+    fontStyle: 'italic',
+    letterSpacing: 1,
+    transform: [{rotate: '-20deg'}],
+  },
+  mapLegend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#6c8b61',
+    marginRight: 5,
+  },
+  legendDotSelected: {
+    backgroundColor: '#c16b48',
+  },
+  legendText: {
+    color: '#5d7056',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  legendDivider: {
+    width: 1,
+    height: 14,
+    backgroundColor: '#c7d7c0',
+    marginHorizontal: 10,
   },
   infoCard: {
     backgroundColor: '#fffdf8',
