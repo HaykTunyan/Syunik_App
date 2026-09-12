@@ -54,6 +54,7 @@ export default function TabNavigator() {
           {({ navigation }) => (
           <TourismScreen
               onBack={() => navigation.goBack()}
+              onSelectCity={() => undefined}
               onSelectVillage={() => undefined}
             />
           )}

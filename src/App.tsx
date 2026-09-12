@@ -19,6 +19,7 @@ import {ProductsScreen} from './view/ProductsScreen';
 import {CityDetailScreen} from './view/CityDetailsScreen';
 import {VillageDetailScreen} from './view/VillageDetailScreen';
 import {RoadScreen} from './view/RoadScreen';
+import {RestaurantsScreen} from './view/RestaurantsScreen';
 import {InitialScreen} from './view/InitialScreen';
 import {
   VoiceAssistantProvider,
@@ -36,6 +37,7 @@ type RootStackParamList = {
   Tourism: undefined;
   Products: undefined;
   Roads: undefined;
+  Restaurants: undefined;
   CityDetail: {city: string};
   VillageDetail: {village: string};
 };
@@ -43,7 +45,7 @@ type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
-type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products' | 'Roads';
+type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products' | 'Roads' | 'Restaurants';
 
 const routeNameMap: Record<AppScreen, MainTabRoute> = {
   home: 'Home',
@@ -53,6 +55,7 @@ const routeNameMap: Record<AppScreen, MainTabRoute> = {
   tourism: 'Tourism',
   products: 'Products',
   roads: 'Roads',
+  restaurants: 'Restaurants',
 };
 
 type AppRouteProps = {
@@ -104,6 +107,7 @@ function AppNavigator() {
       <Stack.Screen name="Tourism" component={TourismRoute} />
       <Stack.Screen name="Products" component={ProductsRoute} />
       <Stack.Screen name="Roads" component={RoadsRoute} />
+      <Stack.Screen name="Restaurants" component={RestaurantsRoute} />
       <Stack.Screen name="CityDetail" component={CityDetailRoute} />
       <Stack.Screen name="VillageDetail" component={VillageDetailRoute} />
     </Stack.Navigator>
@@ -219,6 +223,7 @@ function TourismRoute({navigation}: AppRouteProps) {
     <AppShell activeScreen="tourism" navigation={navigation}>
       <TourismScreen
         onBack={() => navigation.navigate('Home')}
+        onSelectCity={(city: string) => navigation.navigate('CityDetail', {city})}
         onSelectVillage={(village: string) => navigation.navigate('VillageDetail', {village})}
       />
     </AppShell>
@@ -244,6 +249,21 @@ function RoadsRoute({navigation}: AppRouteProps) {
         detail: 'Regional map, mountain routes, road distances, and travel guidance across Syunik.',
       }}>
       <RoadScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function RestaurantsRoute({navigation}: AppRouteProps) {
+  return (
+    <AppShell
+      activeScreen="restaurants"
+      navigation={navigation}
+      assistantContext={{
+        page: 'restaurants',
+        title: 'Restaurants in Syunik',
+        detail: 'Regional dining ideas, local specialties, and practical food tips across Syunik.',
+      }}>
+      <RestaurantsScreen onBack={() => navigation.navigate('Home')} />
     </AppShell>
   );
 }

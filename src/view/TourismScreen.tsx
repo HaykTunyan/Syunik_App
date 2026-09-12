@@ -12,6 +12,7 @@ import {HeaderBack} from '../components/HeaderBack';
 
 type TourismScreenProps = {
   onBack: () => void;
+  onSelectCity: (city: string) => void;
   onSelectVillage: (villageId: string) => void;
 };
 
@@ -191,7 +192,7 @@ export const topVisitingVillages: VillageSpot[] = [
 
 ];
 
-export function TourismScreen({onBack, onSelectVillage}: TourismScreenProps) {
+export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismScreenProps) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
@@ -203,7 +204,12 @@ export function TourismScreen({onBack, onSelectVillage}: TourismScreenProps) {
         </Text>
 
         {cities.map(city => (
-          <View key={city.name} style={styles.card}>
+          <Pressable
+            key={city.name}
+            accessibilityRole="button"
+            accessibilityLabel={`Open ${city.name} city details`}
+            onPress={() => onSelectCity(city.name)}
+            style={({pressed}) => [styles.card, pressed && styles.cardPressed]}>
             <Image source={city.image} resizeMode="stretch" style={styles.image} />
             <Text style={styles.cityName}>{city.name}</Text>
             <Text style={styles.description}>{city.description}</Text>
@@ -212,7 +218,7 @@ export function TourismScreen({onBack, onSelectVillage}: TourismScreenProps) {
                 • {item}
               </Text>
             ))}
-          </View>
+          </Pressable>
         ))}
 
         <View style={styles.villagesSection}>
@@ -275,6 +281,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: {width: 0, height: 3},
     elevation: 3,
+  },
+  cardPressed: {
+    opacity: 0.82,
+    transform: [{scale: 0.985}],
   },
   image: {
     width: '100%',

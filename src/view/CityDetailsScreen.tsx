@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { AttractionsCarousel } from '../components/AttractionsCarousel';
 import { citiesData } from '../data/citiesData';
+import { historicalPlacesByCity } from '../data/historicalPlaces';
 
 const MAP_BOUNDS = {
   minLatitude: 38.84,
@@ -30,6 +31,7 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
    */
 
   const cityData = citiesData.find(c => c.latinName === city);
+  const historicalPlaces = historicalPlacesByCity.find(item => item.city === city)?.places ?? [];
 
   if (!cityData) {
     return (
@@ -55,7 +57,7 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       <Text style={styles.title}>{cityData.latinName}</Text>
       <Text style={styles.description}>{cityData.description}</Text>
 
-      <View style={styles.mapCard}>
+      {/* <View style={styles.mapCard}>
         <View style={styles.mapHeader}>
           <View>
             <Text style={styles.mapEyebrow}>EXPLORE THE REGION</Text>
@@ -96,7 +98,7 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
           <View style={styles.legendDot} />
           <Text style={styles.legendText}>Other cities</Text>
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.infoCard}>
         <Text style={styles.infoTitle}>Most visited place</Text>
@@ -122,6 +124,22 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       <View style={styles.infoCard}>
         <Text style={styles.infoTitle}>Attractions</Text>
         <AttractionsCarousel attractions={cityData.attractions} />
+      </View>
+
+      <View style={styles.historyCard}>
+        <View style={styles.historyHeader}>
+          <View>
+            <Text style={styles.historyEyebrow}>SYUNIK HERITAGE</Text>
+            <Text style={styles.infoTitle}>Historical places</Text>
+          </View>
+          <Text style={styles.historyIcon}>🏛️</Text>
+        </View>
+        {historicalPlaces.map(place => (
+          <View key={place.name} style={styles.historyPlaceRow}>
+            <Text style={styles.historyPlaceName}>{place.name}</Text>
+            <Text style={styles.historyPlaceAddress}>{place.address}</Text>
+          </View>
+        ))}
       </View>
     </ScrollView>
   );
@@ -352,6 +370,46 @@ const styles = StyleSheet.create({
   infoValue: {
     color: '#2f3e2f',
     fontSize: 14,
+  },
+  historyCard: {
+    backgroundColor: '#efe8db',
+    borderColor: '#e1d4c2',
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 16,
+  },
+  historyHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  historyEyebrow: {
+    color: '#a45c3c',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.15,
+    marginBottom: 3,
+  },
+  historyIcon: {
+    fontSize: 24,
+  },
+  historyPlaceRow: {
+    borderTopColor: '#e1d4c2',
+    borderTopWidth: 1,
+    paddingVertical: 11,
+  },
+  historyPlaceName: {
+    color: '#2f3e2f',
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  historyPlaceAddress: {
+    color: '#687362',
+    fontSize: 13,
+    lineHeight: 18,
   },
   backButton: {
     marginBottom: 16,

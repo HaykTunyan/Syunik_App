@@ -4,14 +4,15 @@ import {Pressable, StyleSheet, Text, View} from 'react-native';
 const tabs = [
   {key: 'home', label: 'Home', icon: '🏡'},
   {key: 'tourism', label: 'Tourism', icon: '🌄'},
+  {key: 'restaurants', label: 'Food', icon: '🍽️'},
   {key: 'products', label: 'Products', icon: '🛍️'},
-  {key: 'roads', label: 'Roads', icon: '🛣️'},
+  // {key: 'roads', label: 'Roads', icon: '🛣️'},
   {key: 'history', label: 'History', icon: '🕰️'},
 ] as const;
 
 type BottomNavProps = {
-  activeTab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads';
-  onTabChange: (tab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads') => void;
+  activeTab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants';
+  onTabChange: (tab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants') => void;
 };
 
 export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
@@ -30,7 +31,7 @@ export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
           <Pressable
             key={tab.key}
             style={[styles.tab, isActive && styles.activeTab]}
-            onPress={() => onTabChange(tab.key as 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads')}>
+            onPress={() => onTabChange(tab.key as 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants')}>
             <Text style={styles.icon}>{tab.icon}</Text>
             <Text style={isActive ? styles.activeText : styles.inactiveText}>
               {tab.label}
