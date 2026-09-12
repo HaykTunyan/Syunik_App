@@ -1,110 +1,136 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Syunik Dreams
 
-# Getting Started
+Syunik Dreams is a React Native travel companion for exploring Syunik, Armenia. The app brings together destination guides, local history, tourism routes, restaurants, regional products, and an AI voice guide in one mobile experience.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- Welcome and onboarding flow for first-time visitors.
+- Home screen with featured Syunik destinations.
+- City and village detail pages for places such as Goris, Kapan, Sisian, Meghri, and Qajaran.
+- Tourism and historical information for planning a trip.
+- Road and route information for exploring the region.
+- Restaurant directory with addresses, phone numbers, ratings, and local dining tips.
+- Regional products and shopping content.
+- About and contact pages.
+- Map support through `react-native-maps`.
+- ElevenLabs-powered voice assistant for destination questions and in-app navigation.
+- Native Android and iOS launcher icons generated from `src/assets/logo-syunik.png`.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Technology
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- React Native `0.86`
+- React `19`
+- TypeScript
+- React Navigation
+- React Native Maps
+- React Native Paper
+- Zustand
+- Reanimated and Gesture Handler
+- ElevenLabs and LiveKit React Native integrations
+
+## Requirements
+
+Install the React Native development prerequisites for your platform before continuing:
+
+- Node.js `>= 22.11.0`
+- npm
+- Android Studio and an Android SDK/emulator for Android development
+- Xcode and CocoaPods for iOS development on macOS
+- Ruby Bundler for the repository's CocoaPods setup
+
+See the official [React Native environment setup guide](https://reactnative.dev/docs/set-up-your-environment) for platform-specific SDK requirements.
+
+## Installation
+
+Clone the repository, install JavaScript dependencies, and install iOS native dependencies:
 
 ```sh
-# Using npm
-npm start
+npm install
 
-# OR using Yarn
-yarn start
+cd ios
+bundle install
+bundle exec pod install
+cd ..
 ```
 
-## Step 2: Build and run your app
+The CocoaPods commands are required on the first iOS setup and after native dependency changes.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## Running the app
 
-### Android
+Start Metro in the project root:
 
 ```sh
-# Using npm
+npm start
+```
+
+In a second terminal, launch the Android or iOS application:
+
+```sh
+# Android
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# iOS
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+The app opens on the onboarding screen and then navigates to the Home screen. It can also be built from Android Studio or Xcode after the native dependencies are installed.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Voice assistant setup
 
-## Step 3: Modify your app
+The voice assistant opens from the microphone button in the app header.
 
-Now that you have successfully run the app, let's make changes!
+1. Set the public ElevenLabs Agent ID in [`src/config/elevenLabs.ts`](src/config/elevenLabs.ts).
+2. In the ElevenLabs Agent dashboard, add these client tools with the exact names:
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+   - `get_current_page_context` - takes no parameters and returns the current app page.
+   - `navigate_to_syunik_location` - accepts a `destination` string for cities, villages, roads, landmarks, and historical locations.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Suggested agent instruction:
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+> You are the Syunik Dreams tourist guide. Answer naturally and concisely about Syunik. Before discussing a supported place, road, landmark, route, or historical destination, call `navigate_to_syunik_location` with its name. Use `get_current_page_context` for follow-up questions about the current page.
 
-## Congratulations! :tada:
+Microphone permissions are declared for Android and iOS. Re-run `bundle exec pod install` from `ios` after installing or updating native voice dependencies.
 
-You've successfully run and modified your React Native App. :partying_face:
+## Project structure
 
-### Now what?
+```text
+src/
+  App.tsx                 Application entry point and navigation shell
+  components/             Header, navigation, sidebar, and voice assistant UI
+  config/                 Runtime configuration such as the ElevenLabs Agent ID
+  data/                   Cities, historical places, and assistant destinations
+  features/               Bookings, cart, destinations, and shop features
+  navigation/             Navigation types and navigator implementations
+  view/                   Main application screens
+android/                  Android native project and launcher resources
+ios/                      iOS native project and AppIcon asset catalog
+scripts/                  Native asset generation helpers
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Quality checks
 
-# Troubleshooting
+Run linting and tests from the project root:
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```sh
+npm run lint
+npm test
+```
 
-# Learn More
+For a single test run without watch mode:
 
-To learn more about React Native, take a look at the following resources:
+```sh
+npm test -- --runInBand
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## App icons
 
-## ElevenLabs voice assistant setup
+The source logo is stored at [`src/assets/logo-syunik.png`](src/assets/logo-syunik.png). Generated Android icons live under `android/app/src/main/res/mipmap-*`, and iOS icons live in [`ios/SyunikApp/Images.xcassets/AppIcon.appiconset`](ios/SyunikApp/Images.xcassets/AppIcon.appiconset).
 
-The AI tourist assistant is available from the microphone button in the app header. Before using it, set the public Agent ID from your ElevenLabs Agent in [`src/config/elevenLabs.ts`](src/config/elevenLabs.ts).
+The icon renderer is available at [`scripts/render-icon.swift`](scripts/render-icon.swift).
 
-In the Agent dashboard, add these client tools with the exact names shown below. They let the agent read the visitor's current screen and open the appropriate Syunik Dreams destination while it continues speaking.
+## Resources
 
-- `get_current_page_context` — no parameters; returns the page the visitor is viewing.
-- `navigate_to_syunik_location` — accepts a `destination` string; call it for cities, villages, roads, landmarks, and historical locations in Syunik.
-
-Suggested agent instruction: "You are the Syunik Dreams tourist guide. Answer naturally and concisely about Syunik. Before discussing a supported place, road, landmark, route, or historical destination, call `navigate_to_syunik_location` with its name. Use `get_current_page_context` for follow-up questions about the current page."
-
-The app also resolves recognized visitor transcripts locally, so destination navigation remains reliable when the agent answers without making the navigation tool call. Native microphone permission is already declared for Android and iOS. After installing the new native dependencies, run `bundle exec pod install` in `ios` before building iOS.
+- [React Native documentation](https://reactnative.dev/docs/getting-started)
+- [React Navigation documentation](https://reactnavigation.org/docs/getting-started)
+- [React Native Maps](https://github.com/react-native-maps/react-native-maps)
+- [ElevenLabs Conversational AI](https://elevenlabs.io/docs/conversational-ai)
