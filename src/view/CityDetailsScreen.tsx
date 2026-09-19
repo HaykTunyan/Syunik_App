@@ -1,6 +1,6 @@
 //
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   Pressable,
@@ -10,15 +10,9 @@ import {
   View,
 } from 'react-native';
 import { AttractionsCarousel } from '../components/AttractionsCarousel';
+import {CategoryFilter} from '../components/CategoryFilter';
 import { citiesData } from '../data/citiesData';
 import { historicalPlacesByCity } from '../data/historicalPlaces';
-
-const MAP_BOUNDS = {
-  minLatitude: 38.84,
-  maxLatitude: 39.56,
-  minLongitude: 45.98,
-  maxLongitude: 46.46,
-};
 
 type CityDetailScreenProps = {
   city: string;
@@ -32,6 +26,9 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
 
   const cityData = citiesData.find(c => c.latinName === city);
   const historicalPlaces = historicalPlacesByCity.find(item => item.city === city)?.places ?? [];
+  const [selectedCategory, setSelectedCategory] = useState<
+    'Overview' | 'Places' | 'Details' | 'Attractions' | 'History'
+  >('Overview');
 
   if (!cityData) {
     return (
@@ -56,6 +53,11 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       />
       <Text style={styles.title}>{cityData.latinName}</Text>
       <Text style={styles.description}>{cityData.description}</Text>
+      <CategoryFilter
+        categories={['Overview', 'Places', 'Details', 'Attractions', 'History'] as const}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
       {/* <View style={styles.mapCard}>
         <View style={styles.mapHeader}>
@@ -100,47 +102,55 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
         </View>
       </View> */}
 
-      <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>Most visited place</Text>
-        {cityData.mostVisitedPlace.map(place => (
-          <View key={place.id} style={styles.mostVisitedWrap}>
-            <Image source={place.image} style={styles.mostVisitedImage} resizeMode="cover" />
-            <Text style={styles.highlightText}>{place.text}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>City information</Text>
-        <InfoRow label="Population" value={cityData.population} />
-        <InfoRow label="Area" value={cityData.size} />
-        <InfoRow label="Founded" value={cityData.founding} />
-        <InfoRow
-          label="Coordinates"
-          value={`${cityData.coords[0]}, ${cityData.coords[1]}`}
-        />
-      </View>
-
-      <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>Attractions</Text>
-        <AttractionsCarousel attractions={cityData.attractions} />
-      </View>
-
-      <View style={styles.historyCard}>
-        <View style={styles.historyHeader}>
-          <View>
-            <Text style={styles.historyEyebrow}>SYUNIK HERITAGE</Text>
-            <Text style={styles.infoTitle}>Historical places</Text>
-          </View>
-          <Text style={styles.historyIcon}>🏛️</Text>
+      {(selectedCategory === 'Overview' || selectedCategory === 'Places') && (
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Most visited place</Text>
+          {cityData.mostVisitedPlace.map(place => (
+            <View key={place.id} style={styles.mostVisitedWrap}>
+              <Image source={place.image} style={styles.mostVisitedImage} resizeMode="cover" />
+              <Text style={styles.highlightText}>{place.text}</Text>
+            </View>
+          ))}
         </View>
-        {historicalPlaces.map(place => (
-          <View key={place.name} style={styles.historyPlaceRow}>
-            <Text style={styles.historyPlaceName}>{place.name}</Text>
-            <Text style={styles.historyPlaceAddress}>{place.address}</Text>
+      )}
+
+      {(selectedCategory === 'Overview' || selectedCategory === 'Details') && (
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>City information</Text>
+          <InfoRow label="Population" value={cityData.population} />
+          <InfoRow label="Area" value={cityData.size} />
+          <InfoRow label="Founded" value={cityData.founding} />
+          <InfoRow
+            label="Coordinates"
+            value={`${cityData.coords[0]}, ${cityData.coords[1]}`}
+          />
+        </View>
+      )}
+
+      {(selectedCategory === 'Overview' || selectedCategory === 'Attractions') && (
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Attractions</Text>
+          <AttractionsCarousel attractions={cityData.attractions} />
+        </View>
+      )}
+
+      {(selectedCategory === 'Overview' || selectedCategory === 'History') && (
+        <View style={styles.historyCard}>
+          <View style={styles.historyHeader}>
+            <View>
+              <Text style={styles.historyEyebrow}>SYUNIK HERITAGE</Text>
+              <Text style={styles.infoTitle}>Historical places</Text>
+            </View>
+            <Text style={styles.historyIcon}>🏛️</Text>
           </View>
-        ))}
-      </View>
+          {historicalPlaces.map(place => (
+            <View key={place.name} style={styles.historyPlaceRow}>
+              <Text style={styles.historyPlaceName}>{place.name}</Text>
+              <Text style={styles.historyPlaceAddress}>{place.address}</Text>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }

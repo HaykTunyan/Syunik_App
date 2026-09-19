@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   Image,
   Pressable,
@@ -9,6 +9,7 @@ import {
   type ImageSourcePropType,
 } from 'react-native';
 import {HeaderBack} from '../components/HeaderBack';
+import {CategoryFilter} from '../components/CategoryFilter';
 
 type TourismScreenProps = {
   onBack: () => void;
@@ -193,6 +194,13 @@ export const topVisitingVillages: VillageSpot[] = [
 ];
 
 export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismScreenProps) {
+  const [selectedCategory, setSelectedCategory] = useState<'All' | 'Cities' | 'Villages'>('All');
+  const visibleCities = useMemo(
+    () => (selectedCategory === 'Villages' ? [] : cities),
+    [selectedCategory],
+  );
+  const showVillages = selectedCategory !== 'Cities';
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
@@ -203,7 +211,15 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
           Syunik offers a rich mix of mountains, monasteries, villages, and local traditions. Each city brings its own story, landscape, and experience for travelers.
         </Text>
 
-        {cities.map(city => (
+        <CategoryFilter
+          categories={['All', 'Cities', 'Villages'] as const}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+
+        <View style={styles.filterSpacing} />
+
+        {visibleCities.map(city => (
           <Pressable
             key={city.name}
             accessibilityRole="button"
@@ -221,7 +237,7 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
           </Pressable>
         ))}
 
-        <View style={styles.villagesSection}>
+        {showVillages && <View style={styles.villagesSection}>
           <View style={styles.villagesHeading}>
             <View>
               <Text style={styles.villagesTitle}>Top visiting villages</Text>
@@ -243,7 +259,7 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
               </Pressable>
             ))}
           </View>
-        </View>
+        </View>}
       </ScrollView>
     </View>
   );
@@ -270,6 +286,9 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#4d4d4d',
     marginBottom: 16,
+  },
+  filterSpacing: {
+    height: 14,
   },
   card: {
     backgroundColor: '#fff',

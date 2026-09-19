@@ -1,7 +1,7 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
-export type AppScreen = 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants';
+export type AppScreen = 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants' | 'profile';
 
 type AppHeaderProps = {
   activeScreen: AppScreen;
@@ -18,6 +18,7 @@ const screenTitles: Record<AppScreen, string> = {
   products: 'Local Products',
   roads: 'Roads of Syunik',
   restaurants: 'Taste Syunik',
+  profile: 'Your Profile',
 };
 
 const screenBadges: Record<AppScreen, string> = {
@@ -29,6 +30,7 @@ const screenBadges: Record<AppScreen, string> = {
   products: 'Shop',
   roads: 'Navigate',
   restaurants: 'Dine',
+  profile: 'Personalize',
 };
 
 export function AppHeader({activeScreen, onOpenMenu, onOpenAssistant}: AppHeaderProps) {
