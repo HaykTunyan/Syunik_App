@@ -22,7 +22,7 @@ type ProductItem = {
 
 const products: ProductItem[] = [
   {
-    name: 'Cultural Print Cap',
+    name: 'Syunik T-shirt',
     price: '$16',
     size: 'One Size',
     description: 'A casual cap inspired by the heritage and colors of the region.',
