@@ -18,9 +18,15 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('@react-navigation/stack', () => ({
   createStackNavigator: () => ({
     Navigator: ({children}: {children: React.ReactNode}) => children,
-    Screen: ({component: Component}: {component: React.ComponentType<any>}) => (
-      <Component navigation={{navigate: jest.fn()}} />
-    ),
+    Screen: ({component: Component, children}: {
+      component?: React.ComponentType<any>;
+      children?: React.ReactNode | ((props: {navigation: {navigate: jest.Mock}}) => React.ReactNode);
+    }) =>
+      typeof children === 'function'
+        ? children({navigation: {navigate: jest.fn()}})
+        : Component
+          ? <Component navigation={{navigate: jest.fn()}} />
+          : children,
   }),
 }));
 

@@ -14,6 +14,7 @@
     "@gorhom/bottom-sheet": "^5.2.14",
     "@livekit/react-native": "^2.12.0",
     "@livekit/react-native-webrtc": "^144.1.2",
+    "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/cli-platform-apple": "^20.2.0",
     "@react-native/new-app-screen": "0.86.0",
     "@react-navigation/bottom-tabs": "^7.18.14",

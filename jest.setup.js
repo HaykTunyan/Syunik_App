@@ -2,6 +2,23 @@
 
 require('react-native-gesture-handler/jestSetup');
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(() => Promise.resolve(null)),
+  setItem: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('react-native-maps', () => {
+  const React = require('react');
+  const MapView = ({children}) => React.createElement('View', null, children);
+
+  return {
+    __esModule: true,
+    default: MapView,
+    Marker: MapView,
+    UrlTile: MapView,
+  };
+});
+
 // Voice sessions depend on native WebRTC/audio modules, which are exercised on
 // device builds rather than the JS renderer used by this test suite.
 jest.mock('@elevenlabs/react-native', () => {
