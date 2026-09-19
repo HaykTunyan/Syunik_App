@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {StatusBar, StyleSheet, useColorScheme, View} from 'react-native';
 import {createNavigationContainerRef, NavigationContainer} from '@react-navigation/native';
 
@@ -21,6 +22,8 @@ import {VillageDetailScreen} from './view/VillageDetailScreen';
 import {RoadScreen} from './view/RoadScreen';
 import {RestaurantsScreen} from './view/RestaurantsScreen';
 import {InitialScreen} from './view/InitialScreen';
+import {ProfileScreen} from './view/ProfileScreen';
+import {NamePromptModal} from './components/NamePromptModal';
 import {
   VoiceAssistantProvider,
   useVoiceAssistant,
@@ -38,6 +41,7 @@ type RootStackParamList = {
   Products: undefined;
   Roads: undefined;
   Restaurants: undefined;
+  Profile: undefined;
   CityDetail: {city: string};
   VillageDetail: {village: string};
 };
@@ -45,7 +49,7 @@ type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
-type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products' | 'Roads' | 'Restaurants';
+type MainTabRoute = 'Home' | 'About' | 'History' | 'Contact' | 'Tourism' | 'Products' | 'Roads' | 'Restaurants' | 'Profile';
 
 const routeNameMap: Record<AppScreen, MainTabRoute> = {
   home: 'Home',
@@ -56,6 +60,7 @@ const routeNameMap: Record<AppScreen, MainTabRoute> = {
   products: 'Products',
   roads: 'Roads',
   restaurants: 'Restaurants',
+  profile: 'Profile',
 };
 
 type AppRouteProps = {
@@ -70,15 +75,51 @@ type CityDetailRouteProps = {
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const [profileName, setProfileName] = useState('');
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [hasEnteredApp, setHasEnteredApp] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const [savedName, promptShown] = await Promise.all([
+        AsyncStorage.getItem('syunik.profile.name'),
+        AsyncStorage.getItem('syunik.profile.promptShown'),
+      ]);
+      setProfileName(savedName ?? '');
+      setShowNamePrompt(!savedName && promptShown !== 'true');
+      setIsProfileLoaded(true);
+    };
+    loadProfile();
+  }, []);
+
+  const saveProfileName = (name: string) => {
+    setProfileName(name);
+    setShowNamePrompt(false);
+    AsyncStorage.setItem('syunik.profile.name', name);
+    AsyncStorage.setItem('syunik.profile.promptShown', 'true');
+  };
+
+  const skipNamePrompt = () => {
+    setShowNamePrompt(false);
+    AsyncStorage.setItem('syunik.profile.promptShown', 'true');
+  };
 
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <NavigationContainer ref={navigationRef}>
         <VoiceAssistantProvider onNavigate={navigateToAssistantDestination}>
-          <AppNavigator />
+          <AppNavigator
+            profileName={profileName}
+            onSaveProfileName={saveProfileName}
+            onInitialComplete={() => setHasEnteredApp(true)}
+          />
         </VoiceAssistantProvider>
       </NavigationContainer>
+      {isProfileLoaded && hasEnteredApp && (
+        <NamePromptModal visible={showNamePrompt} onSave={saveProfileName} onSkip={skipNamePrompt} />
+      )}
     </SafeAreaProvider>
   );
 }
@@ -96,10 +137,22 @@ function navigateToAssistantDestination(destination: AssistantDestination) {
   navigationRef.navigate('VillageDetail', {village: destination.id});
 }
 
-function AppNavigator() {
+function AppNavigator({
+  profileName,
+  onSaveProfileName,
+  onInitialComplete,
+}: {
+  profileName: string;
+  onSaveProfileName: (name: string) => void;
+  onInitialComplete: () => void;
+}) {
   return (
     <Stack.Navigator initialRouteName="Initial" screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Initial" component={InitialRoute} />
+      <Stack.Screen name="Initial">
+        {({navigation}) => (
+          <InitialRoute navigation={navigation} onComplete={onInitialComplete} />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="Home" component={HomeRoute} />
       <Stack.Screen name="About" component={AboutRoute} />
       <Stack.Screen name="History" component={HistoryRoute} />
@@ -108,6 +161,15 @@ function AppNavigator() {
       <Stack.Screen name="Products" component={ProductsRoute} />
       <Stack.Screen name="Roads" component={RoadsRoute} />
       <Stack.Screen name="Restaurants" component={RestaurantsRoute} />
+      <Stack.Screen name="Profile">
+        {({navigation}) => (
+          <ProfileRoute
+            navigation={navigation}
+            profileName={profileName}
+            onSaveProfileName={onSaveProfileName}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="CityDetail" component={CityDetailRoute} />
       <Stack.Screen name="VillageDetail" component={VillageDetailRoute} />
     </Stack.Navigator>
@@ -165,10 +227,11 @@ function AppShell({activeScreen, navigation, children, assistantContext}: AppShe
   );
 }
 
-function InitialRoute({navigation}: AppRouteProps) {
+function InitialRoute({navigation, onComplete}: AppRouteProps & {onComplete: () => void}) {
   return (
     <InitialScreen
       onFinish={() => {
+        onComplete();
         if ('replace' in navigation && typeof navigation.replace === 'function') {
           navigation.replace('Home');
           return;
@@ -264,6 +327,26 @@ function RestaurantsRoute({navigation}: AppRouteProps) {
         detail: 'Regional dining ideas, local specialties, and practical food tips across Syunik.',
       }}>
       <RestaurantsScreen onBack={() => navigation.navigate('Home')} />
+    </AppShell>
+  );
+}
+
+function ProfileRoute({
+  navigation,
+  profileName,
+  onSaveProfileName,
+}: {
+  navigation: StackNavigationProp<RootStackParamList>;
+  profileName: string;
+  onSaveProfileName: (name: string) => void;
+}) {
+  return (
+    <AppShell activeScreen="profile" navigation={navigation}>
+      <ProfileScreen
+        name={profileName}
+        onBack={() => navigation.navigate('Home')}
+        onSaveName={onSaveProfileName}
+      />
     </AppShell>
   );
 }

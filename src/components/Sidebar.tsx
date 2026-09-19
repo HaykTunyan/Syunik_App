@@ -19,6 +19,7 @@ const menuItems: Array<{key: AppScreen; label: string; description: string; icon
   {key: 'products', label: 'Local products', description: 'Made in Syunik', icon: '✦'},
   {key: 'history', label: 'History', description: 'Stories and heritage', icon: '◷'},
   {key: 'contact', label: 'Contact us', description: 'Get in touch with our team', icon: '✉'},
+  {key: 'profile', label: 'My profile', description: 'Manage your travel name', icon: '●'},
 ];
 
 export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: SidebarProps) {

@@ -1,13 +1,19 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Compass,
+  History,
+  Home,
+  ShoppingBag,
+  Utensils,
+} from 'lucide-react-native';
 
 const tabs = [
-  {key: 'home', label: 'Home', icon: '🏡'},
-  {key: 'tourism', label: 'Tourism', icon: '🌄'},
-  {key: 'restaurants', label: 'Food', icon: '🍽️'},
-  {key: 'products', label: 'Products', icon: '🛍️'},
-  // {key: 'roads', label: 'Roads', icon: '🛣️'},
-  {key: 'history', label: 'History', icon: '🕰️'},
+  {key: 'home', label: 'Home', icon: Home},
+  {key: 'tourism', label: 'Tourism', icon: Compass},
+  {key: 'restaurants', label: 'Food', icon: Utensils},
+  {key: 'products', label: 'Products', icon: ShoppingBag},
+  {key: 'history', label: 'History', icon: History},
 ] as const;
 
 type BottomNavProps = {
@@ -26,16 +32,25 @@ export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
     <View style={styles.container}>
       {tabs.map(tab => {
         const isActive = activeTab === tab.key;
+        const Icon = tab.icon;
 
         return (
           <Pressable
             key={tab.key}
-            style={[styles.tab, isActive && styles.activeTab]}
-            onPress={() => onTabChange(tab.key as 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants')}>
-            <Text style={styles.icon}>{tab.icon}</Text>
-            <Text style={isActive ? styles.activeText : styles.inactiveText}>
-              {tab.label}
-            </Text>
+            style={styles.tab}
+            onPress={() => onTabChange(tab.key)}
+            accessibilityRole="tab"
+            accessibilityState={{selected: isActive}}>
+            <View style={[styles.tabContent, isActive && styles.activeTab]}>
+              <Icon
+                size={22}
+                color={isActive ? '#2D4A3E' : '#8C8C8C'}
+                strokeWidth={2}
+              />
+              <Text style={isActive ? styles.activeText : styles.inactiveText}>
+                {tab.label}
+              </Text>
+            </View>
           </Pressable>
         );
       })}
@@ -47,9 +62,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fffbf7',
+    backgroundColor: '#FBF8F3',
     borderTopWidth: 1,
-    borderTopColor: '#eee0c5',
+    borderTopColor: '#EDE7DE',
     paddingHorizontal: 12,
     paddingTop: 10,
     paddingBottom: 14,
@@ -64,33 +79,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 16,
     minHeight: 62,
   },
-  activeTab: {
-    backgroundColor: '#edf5ea',
-    borderWidth: 1,
-    borderColor: '#d7e7d0',
-    shadowColor: '#4b6b3b',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: {width: 0, height: 2},
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
   },
-  icon: {
-    fontSize: 20,
-    marginBottom: 4,
+  activeTab: {
+    backgroundColor: '#E3EFEA',
   },
   activeText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#375a37',
+    color: '#2D4A3E',
     letterSpacing: 0.2,
+    marginTop: 4,
   },
   inactiveText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#7f8f72',
+    color: '#8C8C8C',
     letterSpacing: 0.2,
+    marginTop: 4,
   },
 });

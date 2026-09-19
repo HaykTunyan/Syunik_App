@@ -1,7 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { HeaderBack } from '../components/HeaderBack';
-import { citiesData } from '../data/citiesData';
 
 import MapView, { UrlTile, Marker } from 'react-native-maps';
 
@@ -48,13 +47,6 @@ const routes: RoadRoute[] = [
         color: '#6d7fa0',
     },
 ];
-
-const mapBounds = {
-    minLatitude: 38.84,
-    maxLatitude: 39.56,
-    minLongitude: 45.98,
-    maxLongitude: 46.46,
-};
 
 export function RoadScreen({ onBack }: RoadScreenProps) {
     return (
@@ -105,27 +97,29 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
         </View> */}
 
                 {/*  Map of Syunik */}
-                <View style={styles.mapCard}>
-                    <MapView
-                        style={styles.nativeMap}
-                        initialRegion={{
-                            latitude: 39.5,
-                            longitude: 46.3,
-                            latitudeDelta: 0.5,
-                            longitudeDelta: 0.5,
-                        }}>
-                        <UrlTile
-                            urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            maximumZ={19}
-                            flipY={false}
-                        />
-                        <Marker
-                            coordinate={{ latitude: 39.3794, longitude: 46.2501 }}
-                            title="Tatev Monastery"
-                            description="9th-century monastery"
-                        />
-                    </MapView>
-                </View>
+        <View style={styles.mapContainer}>
+            <View style={styles.mapCard}>
+                <MapView
+                    style={styles.nativeMap}
+                    initialRegion={{
+                        latitude: 39.5,
+                        longitude: 46.3,
+                        latitudeDelta: 0.5,
+                        longitudeDelta: 0.5,
+                    }}>
+                    <UrlTile
+                        urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        maximumZ={19}
+                        flipY={false}
+                    />
+                    <Marker
+                        coordinate={{ latitude: 39.3794, longitude: 46.2501 }}
+                        title="Tatev Monastery"
+                        description="9th-century monastery"
+                    />
+                </MapView>
+            </View>
+        </View>
 
                 <View style={styles.notice}>
                     <Text style={styles.noticeIcon}>i</Text>
@@ -170,8 +164,20 @@ const styles = StyleSheet.create({
     eyebrow: { color: '#738767', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginTop: 5, marginBottom: 5 },
     title: { color: '#2f3e2f', fontSize: 30, fontWeight: '800', marginBottom: 8 },
     intro: { color: '#586254', fontSize: 15, lineHeight: 22, marginBottom: 18 },
-    mapCard: { backgroundColor: '#eef3e9', borderColor: '#d4e1cd', borderRadius: 18, borderWidth: 1, padding: 14, marginBottom: 14 },
-    nativeMap: { width: '100%', height: 360, borderRadius: 14 },
+    mapContainer: { paddingHorizontal: 16, marginTop: 12, marginBottom: 16 },
+    mapCard: {
+        backgroundColor: '#eef3e9',
+        borderColor: '#d4e1cd',
+        borderRadius: 16,
+        borderWidth: 1,
+        overflow: 'hidden',
+        shadowColor: '#2f3e2f',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    nativeMap: { width: '100%', height: 360 },
     mapHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
     mapEyebrow: { color: '#71866a', fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 3 },
     mapTitle: { color: '#2f3e2f', fontSize: 17, fontWeight: '800' },
