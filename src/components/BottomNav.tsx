@@ -34,6 +34,9 @@ export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
         const isActive = activeTab === tab.key;
         const Icon = tab.icon;
 
+
+        console.log('Rendering tab:', tab.key, 'Active:', isActive); // Debugging log
+
         return (
           <Pressable
             key={tab.key}
