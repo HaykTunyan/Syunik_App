@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 import {
   Compass,
   History,
@@ -50,9 +50,6 @@ export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
                 color={isActive ? '#2D4A3E' : '#8C8C8C'}
                 strokeWidth={2}
               />
-              <Text style={isActive ? styles.activeText : styles.inactiveText}>
-                {tab.label}
-              </Text>
             </View>
           </Pressable>
         );

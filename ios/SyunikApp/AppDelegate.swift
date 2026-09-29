@@ -21,13 +21,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    window = UIWindow(frame: UIScreen.main.bounds)
+    // window = UIWindow(frame: UIScreen.main.bounds)
 
-    factory.startReactNative(
-      withModuleName: "SyunikApp",
-      in: window,
-      launchOptions: launchOptions
-    )
+    // factory.startReactNative(
+    //   withModuleName: "SyunikApp",
+    //   in: window,
+    //   launchOptions: launchOptions
+    // )
 
     return true
   }
