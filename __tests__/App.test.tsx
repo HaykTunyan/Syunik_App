@@ -9,6 +9,10 @@ import App from '../src/App';
 
 jest.mock('@react-navigation/native', () => ({
   NavigationContainer: ({children}: {children: React.ReactNode}) => children,
+  useFocusEffect: (effect: () => void | (() => void)) => {
+    const TestReact = jest.requireActual<typeof React>('react');
+    TestReact.useEffect(effect, [effect]);
+  },
   createNavigationContainerRef: () => ({
     isReady: () => false,
     navigate: jest.fn(),

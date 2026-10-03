@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {StatusBar, StyleSheet, useColorScheme, View} from 'react-native';
 import {createNavigationContainerRef, NavigationContainer} from '@react-navigation/native';
@@ -93,11 +93,13 @@ function App() {
     loadProfile();
   }, []);
 
-  const saveProfileName = (name: string) => {
+  const saveProfileName = async (name: string) => {
+    await Promise.all([
+      AsyncStorage.setItem('syunik.profile.name', name),
+      AsyncStorage.setItem('syunik.profile.promptShown', 'true'),
+    ]);
     setProfileName(name);
     setShowNamePrompt(false);
-    AsyncStorage.setItem('syunik.profile.name', name);
-    AsyncStorage.setItem('syunik.profile.promptShown', 'true');
   };
 
   const skipNamePrompt = () => {
@@ -143,7 +145,7 @@ function AppNavigator({
   onInitialComplete,
 }: {
   profileName: string;
-  onSaveProfileName: (name: string) => void;
+  onSaveProfileName: (name: string) => Promise<void>;
   onInitialComplete: () => void;
 }) {
   return (
@@ -187,14 +189,19 @@ function AppShell({activeScreen, navigation, children, assistantContext}: AppShe
   const safeAreaInsets = useSafeAreaInsets();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const {openAssistant, updatePageContext} = useVoiceAssistant();
-  const context = assistantContext ?? {
-    page: activeScreen,
-    title: `${activeScreen.charAt(0).toUpperCase()}${activeScreen.slice(1)} in Syunik Dreams`,
-  };
+  const {page: assistantPage, title: assistantTitle, detail: assistantDetail} = assistantContext ?? {};
+  const context = useMemo(
+    () => ({
+      page: assistantPage ?? activeScreen,
+      title: assistantTitle ?? `${activeScreen.charAt(0).toUpperCase()}${activeScreen.slice(1)} in Syunik Dreams`,
+      ...(assistantDetail ? {detail: assistantDetail} : {}),
+    }),
+    [activeScreen, assistantDetail, assistantPage, assistantTitle],
+  );
 
   useEffect(() => {
     updatePageContext(context);
-  }, [context.detail, context.page, context.title, updatePageContext]);
+  }, [context, updatePageContext]);
 
   const navigateTo = (nextScreen: AppScreen) => {
     navigation.navigate(routeNameMap[nextScreen]);
@@ -211,7 +218,7 @@ function AppShell({activeScreen, navigation, children, assistantContext}: AppShe
         <View style={styles.contentWrapper}>{children}</View>
 
         {/* <TabNavigator /> */}
-        <BottomNav activeTab={activeScreen as any} onTabChange={navigateTo} />
+        <BottomNav activeTab={activeScreen} onTabChange={navigateTo} />
 
         <Sidebar
           isOpen={isSidebarOpen}
@@ -338,14 +345,14 @@ function ProfileRoute({
 }: {
   navigation: StackNavigationProp<RootStackParamList>;
   profileName: string;
-  onSaveProfileName: (name: string) => void;
+  onSaveProfileName: (name: string) => Promise<void>;
 }) {
   return (
     <AppShell activeScreen="profile" navigation={navigation}>
       <ProfileScreen
         name={profileName}
-        onBack={() => navigation.navigate('Home')}
         onSaveName={onSaveProfileName}
+        onBrowsePlaces={() => navigation.navigate('Tourism')}
       />
     </AppShell>
   );

@@ -7,6 +7,20 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(() => Promise.resolve()),
 }));
 
+jest.mock('react-native-image-picker', () => ({
+  launchImageLibrary: jest.fn(() => Promise.resolve({didCancel: true})),
+}));
+
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = require('react');
+  const DateTimePicker = props => React.createElement('View', props);
+
+  return {
+    __esModule: true,
+    default: DateTimePicker,
+  };
+});
+
 jest.mock('react-native-maps', () => {
   const React = require('react');
   const MapView = ({children}) => React.createElement('View', null, children);
@@ -22,8 +36,6 @@ jest.mock('react-native-maps', () => {
 // Voice sessions depend on native WebRTC/audio modules, which are exercised on
 // device builds rather than the JS renderer used by this test suite.
 jest.mock('@elevenlabs/react-native', () => {
-  const React = require('react');
-
   return {
     ConversationProvider: ({children}) => children,
     useConversation: () => ({

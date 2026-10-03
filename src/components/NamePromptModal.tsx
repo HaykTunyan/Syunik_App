@@ -3,15 +3,23 @@ import {Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native'
 
 type NamePromptModalProps = {
   visible: boolean;
-  onSave: (name: string) => void;
+  onSave: (name: string) => void | Promise<void>;
   onSkip: () => void;
 };
 
 export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps) {
   const [name, setName] = useState('');
-  const save = () => {
+  const [message, setMessage] = useState('');
+  const save = async () => {
     const trimmedName = name.trim();
-    if (trimmedName) onSave(trimmedName);
+    if (!trimmedName) return;
+
+    try {
+      await onSave(trimmedName);
+      setMessage('');
+    } catch {
+      setMessage('Could not save your name. Please try again.');
+    }
   };
 
   return (
@@ -21,6 +29,7 @@ export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps)
           <Text style={styles.eyebrow}>WELCOME TO SYUNIK</Text>
           <Text style={styles.title}>What should we call you?</Text>
           <Text style={styles.description}>Tell us your name to make your travel companion feel more personal.</Text>
+          {!!message && <Text style={styles.errorMessage}>{message}</Text>}
           <TextInput
             autoFocus
             value={name}
@@ -48,6 +57,7 @@ const styles = StyleSheet.create({
   eyebrow: {color: '#738767', fontSize: 10, fontWeight: '800', letterSpacing: 1.2},
   title: {color: '#2f3e2f', fontSize: 25, fontWeight: '800', marginTop: 8},
   description: {color: '#586254', fontSize: 14, lineHeight: 20, marginTop: 8, marginBottom: 18},
+  errorMessage: {color: '#b84f3c', fontSize: 13, marginBottom: 12},
   input: {height: 50, borderRadius: 12, borderWidth: 1, borderColor: '#d8d0c4', paddingHorizontal: 14, color: '#2f3e2f', fontSize: 16, backgroundColor: '#fff'},
   saveButton: {alignItems: 'center', borderRadius: 12, backgroundColor: '#2D4A3E', marginTop: 14, paddingVertical: 14},
   disabledButton: {opacity: 0.45},

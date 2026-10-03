@@ -1,5 +1,7 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Menu, Mic} from 'lucide-react-native';
+import {colors} from '../config/theme';
 
 export type AppScreen = 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants' | 'profile';
 
@@ -18,27 +20,19 @@ const screenTitles: Record<AppScreen, string> = {
   products: 'Local Products',
   roads: 'Roads of Syunik',
   restaurants: 'Taste Syunik',
-  profile: 'Your Profile',
-};
-
-const screenBadges: Record<AppScreen, string> = {
-  home: 'Explore',
-  about: 'Learn',
-  history: 'Discover',
-  contact: 'Reach out',
-  tourism: 'Visit',
-  products: 'Shop',
-  roads: 'Navigate',
-  restaurants: 'Dine',
-  profile: 'Personalize',
+  profile: 'Your profile',
 };
 
 export function AppHeader({activeScreen, onOpenMenu, onOpenAssistant}: AppHeaderProps) {
   return (
     <View style={styles.header}>
       <View style={styles.leftSection}>
-        <Pressable onPress={onOpenMenu} style={styles.menuButton}>
-          <Text style={styles.menuIcon}>☰</Text>
+        <Pressable
+          onPress={onOpenMenu}
+          style={styles.menuButton}
+          accessibilityRole="button"
+          accessibilityLabel="Open menu">
+          <Menu size={20} color={colors.text} />
         </Pressable>
         <View>
           <Text style={styles.title}>{screenTitles[activeScreen]}</Text>
@@ -50,7 +44,7 @@ export function AppHeader({activeScreen, onOpenMenu, onOpenAssistant}: AppHeader
         style={styles.assistantButton}
         accessibilityRole="button"
         accessibilityLabel="Open AI tourist assistant">
-        <Text style={styles.assistantIcon}>🎙</Text>
+        <Mic size={20} color={colors.brand} />
       </Pressable>
     </View>
   );
@@ -63,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#f6efe6',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e6d8c3',
   },
@@ -74,37 +68,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#e6d8c3',
-  },
-  menuIcon: {
-    fontSize: 18,
-    color: '#2f3e2f',
-    fontWeight: '700',
+    borderColor: colors.border,
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2f3e2f',
+    color: colors.text,
   },
   assistantButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: '#e5f0df',
-    borderColor: '#cddfc5',
+    backgroundColor: colors.brandSoft,
+    borderColor: colors.border,
     borderWidth: 1,
-  },
-  assistantIcon: {
-    fontSize: 19,
   },
   subtitle: {
     fontSize: 12,

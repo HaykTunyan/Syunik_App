@@ -1,5 +1,8 @@
-import React, {useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
+import {Heart} from 'lucide-react-native';
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -10,6 +13,9 @@ import {
 } from 'react-native';
 import {HeaderBack} from '../components/HeaderBack';
 import {CategoryFilter} from '../components/CategoryFilter';
+import {colors} from '../config/theme';
+import {loadFavorites, toggleFavorite} from '../features/profile/services/profileStorage';
+import {profileStrings} from '../features/profile/strings';
 
 type TourismScreenProps = {
   onBack: () => void;
@@ -19,7 +25,7 @@ type TourismScreenProps = {
 
 type CitySpot = {
   name: string;
-  image: any;
+  image: ImageSourcePropType;
   description: string;
   highlights: string[];
 };
@@ -195,11 +201,54 @@ export const topVisitingVillages: VillageSpot[] = [
 
 export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<'All' | 'Cities' | 'Villages'>('All');
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favoriteMessage, setFavoriteMessage] = useState('');
   const visibleCities = useMemo(
     () => (selectedCategory === 'Villages' ? [] : cities),
     [selectedCategory],
   );
   const showVillages = selectedCategory !== 'Cities';
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      loadFavorites()
+        .then(savedFavorites => {
+          if (isActive) {
+            setFavorites(savedFavorites);
+          }
+        })
+        .catch(() => {
+          if (isActive) {
+            setFavoriteMessage(profileStrings.favorites.exploreSaveError);
+          }
+        });
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
+
+  const handleToggleFavorite = async (place: string) => {
+    try {
+      const isFavorite = await toggleFavorite(place);
+      setFavorites(current =>
+        isFavorite
+          ? [...current.filter(item => item.toLocaleLowerCase() !== place.toLocaleLowerCase()), place]
+          : current.filter(item => item.toLocaleLowerCase() !== place.toLocaleLowerCase()),
+      );
+      setFavoriteMessage(isFavorite
+        ? profileStrings.favorites.exploreAdded
+        : profileStrings.favorites.exploreRemoved);
+    } catch {
+      setFavoriteMessage(profileStrings.favorites.exploreSaveError);
+      Alert.alert(profileStrings.favorites.title, profileStrings.favorites.exploreSaveError);
+    }
+  };
+
+  const isFavorite = (place: string) =>
+    favorites.some(item => item.toLocaleLowerCase() === place.toLocaleLowerCase());
 
   return (
     <View style={styles.container}>
@@ -219,23 +268,41 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
 
         <View style={styles.filterSpacing} />
 
-        {visibleCities.map(city => (
-          <Pressable
-            key={city.name}
-            accessibilityRole="button"
-            accessibilityLabel={`Open ${city.name} city details`}
-            onPress={() => onSelectCity(city.name)}
-            style={({pressed}) => [styles.card, pressed && styles.cardPressed]}>
-            <Image source={city.image} resizeMode="stretch" style={styles.image} />
-            <Text style={styles.cityName}>{city.name}</Text>
-            <Text style={styles.description}>{city.description}</Text>
-            {city.highlights.map(item => (
-              <Text key={item} style={styles.highlight}>
-                • {item}
-              </Text>
-            ))}
-          </Pressable>
-        ))}
+        {!!favoriteMessage && <Text accessibilityRole="text" style={styles.favoriteMessage}>{favoriteMessage}</Text>}
+
+        {visibleCities.map(city => {
+          const cityIsFavorite = isFavorite(city.name);
+          return (
+            <View key={city.name} style={styles.card}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${city.name} city details`}
+                onPress={() => onSelectCity(city.name)}
+                style={({pressed}) => pressed && styles.cardPressed}>
+                <Image source={city.image} resizeMode="stretch" style={styles.image} />
+                <Text style={styles.cityName}>{city.name}</Text>
+                <Text style={styles.description}>{city.description}</Text>
+                {city.highlights.map(item => (
+                  <Text key={item} style={styles.highlight}>
+                    • {item}
+                  </Text>
+                ))}
+              </Pressable>
+              <Pressable
+                onPress={() => handleToggleFavorite(city.name)}
+                style={styles.cityFavoriteButton}
+                accessibilityRole="button"
+                accessibilityLabel={`${cityIsFavorite ? profileStrings.favorites.removeFromExplore : profileStrings.favorites.addFromExplore}: ${city.name}`}
+                accessibilityState={{selected: cityIsFavorite}}>
+                <Heart
+                  size={21}
+                  color={cityIsFavorite ? colors.accent : colors.brand}
+                  fill={cityIsFavorite ? colors.accent : 'transparent'}
+                />
+              </Pressable>
+            </View>
+          );
+        })}
 
         {showVillages && <View style={styles.villagesSection}>
           <View style={styles.villagesHeading}>
@@ -247,17 +314,38 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
           </View>
 
           <View style={styles.villagesList}>
-            {topVisitingVillages.map((village, index) => (
-              <Pressable key={village.id} onPress={() => onSelectVillage(village.id)} style={styles.villageItem}>
-                <View style={styles.villageNumber}>
-                  <Text style={styles.villageNumberText}>{String(index + 1).padStart(2, '0')}</Text>
+            {topVisitingVillages.map((village, index) => {
+              const villageIsFavorite = isFavorite(village.name);
+              return (
+                <View key={village.id} style={styles.villageItem}>
+                  <Pressable
+                    onPress={() => onSelectVillage(village.id)}
+                    style={styles.villageMain}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${village.name} village details`}>
+                    <View style={styles.villageNumber}>
+                      <Text style={styles.villageNumberText}>{String(index + 1).padStart(2, '0')}</Text>
+                    </View>
+                    <View style={styles.villageInfo}>
+                      <Text style={styles.villageName}>{village.name}</Text>
+                      <Text style={styles.villageLocation}>📍 {village.location}</Text>
+                    </View>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleToggleFavorite(village.name)}
+                    style={styles.villageFavoriteButton}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${villageIsFavorite ? profileStrings.favorites.removeFromExplore : profileStrings.favorites.addFromExplore}: ${village.name}`}
+                    accessibilityState={{selected: villageIsFavorite}}>
+                    <Heart
+                      size={21}
+                      color={villageIsFavorite ? colors.accent : colors.white}
+                      fill={villageIsFavorite ? colors.accent : 'transparent'}
+                    />
+                  </Pressable>
                 </View>
-                <View style={styles.villageInfo}>
-                  <Text style={styles.villageName}>{village.name}</Text>
-                  <Text style={styles.villageLocation}>📍 {village.location}</Text>
-                </View>
-              </Pressable>
-            ))}
+              );
+            })}
           </View>
         </View>}
       </ScrollView>
@@ -291,6 +379,7 @@ const styles = StyleSheet.create({
     height: 14,
   },
   card: {
+    position: 'relative',
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 14,
@@ -311,6 +400,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
   },
+  cityFavoriteButton: {
+    position: 'absolute',
+    top: 22,
+    right: 22,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 24,
+    backgroundColor: colors.surface,
+    elevation: 2,
+  },
+  favoriteMessage: {color: colors.textSecondary, fontSize: 13, marginBottom: 12},
   cityName: {
     fontSize: 18,
     fontWeight: '700',
@@ -374,6 +476,8 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
+  villageMain: {flex: 1, minHeight: 44, flexDirection: 'row', alignItems: 'center'},
+  villageFavoriteButton: {width: 44, height: 44, alignItems: 'center', justifyContent: 'center'},
   villageNumber: {
     width: 35,
     height: 35,

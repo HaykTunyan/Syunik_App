@@ -1,41 +1,53 @@
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   Compass,
   History,
   Home,
   ShoppingBag,
   Utensils,
+  UserRound,
 } from 'lucide-react-native';
+import {colors} from '../config/theme';
+import type {AppScreen} from './AppHeader';
 
 const tabs = [
   {key: 'home', label: 'Home', icon: Home},
-  {key: 'tourism', label: 'Tourism', icon: Compass},
+  {key: 'tourism', label: 'Explore', icon: Compass},
   {key: 'restaurants', label: 'Food', icon: Utensils},
   {key: 'products', label: 'Products', icon: ShoppingBag},
   {key: 'history', label: 'History', icon: History},
+  {key: 'profile', label: 'Profile', icon: UserRound},
 ] as const;
 
 type BottomNavProps = {
-  activeTab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants';
-  onTabChange: (tab: 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants') => void;
+  activeTab: AppScreen;
+  onTabChange: (tab: AppScreen) => void;
 };
 
 export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
 
-/**
- * 
- * Buttom Nav is a React component that renders a bottom navigation bar for the Syunik App. It displays a set of tabs, each representing a different section of the app (Home, About, Tourism, Products, History). The component highlights the currently active tab and allows users to switch between tabs by pressing them. It accepts two props: activeTab, which indicates the currently selected tab, and onTabChange, a callback function that is called when a user selects a different tab.
- */
+  /**
+   * 
+   * Bottom navigation bar component for the app. It displays a row of tabs at the bottom of the screen, allowing users to navigate between different sections of the app. Each tab consists of an icon and a label, and the active tab is highlighted with a different color and background.
+   * 
+   * Props:
+   * - activeTab: The currently active tab (of type AppScreen).
+   * - onTabChange: A callback function that is called when a tab is pressed, passing the selected tab as an argument.
+   * 
+   * The component uses the useSafeAreaInsets hook to ensure that the bottom navigation bar respects the device's safe area insets, providing appropriate padding at the bottom of the screen.
+   * 
+   */
+
+
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {paddingBottom: Math.max(10, insets.bottom)}]}>
       {tabs.map(tab => {
         const isActive = activeTab === tab.key;
         const Icon = tab.icon;
-
-
-        console.log('Rendering tab:', tab.key, 'Active:', isActive); // Debugging log
 
         return (
           <Pressable
@@ -43,14 +55,16 @@ export function BottomNav({activeTab, onTabChange}: BottomNavProps) {
             style={styles.tab}
             onPress={() => onTabChange(tab.key)}
             accessibilityRole="tab"
+            accessibilityLabel={tab.label}
             accessibilityState={{selected: isActive}}>
-            <View style={[styles.tabContent, isActive && styles.activeTab]}>
+            <View style={[styles.iconPill, isActive && styles.activeIconPill]}>
               <Icon
                 size={22}
-                color={isActive ? '#2D4A3E' : '#8C8C8C'}
+                color={isActive ? colors.brand : colors.tabInactive}
                 strokeWidth={2}
               />
             </View>
+            <Text style={[styles.label, isActive && styles.activeLabel]}>{tab.label}</Text>
           </Pressable>
         );
       })}
@@ -62,13 +76,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FBF8F3',
+    backgroundColor: colors.surfaceAlt,
     borderTopWidth: 1,
-    borderTopColor: '#EDE7DE',
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 14,
-    gap: 8,
+    borderTopColor: colors.border,
+    paddingHorizontal: 5,
+    paddingTop: 6,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: -3},
     shadowOpacity: 0.08,
@@ -79,30 +91,26 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 62,
+    minHeight: 60,
   },
-  tabContent: {
+  iconPill: {
+    width: 44,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
     borderRadius: 16,
   },
-  activeTab: {
-    backgroundColor: '#E3EFEA',
+  activeIconPill: {
+    backgroundColor: colors.brandSoft,
   },
-  activeText: {
-    fontSize: 12,
+  label: {
+    fontSize: 10,
+    lineHeight: 14,
+    color: colors.tabInactive,
+    marginTop: 2,
+  },
+  activeLabel: {
     fontWeight: '700',
-    color: '#2D4A3E',
-    letterSpacing: 0.2,
-    marginTop: 4,
-  },
-  inactiveText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#8C8C8C',
-    letterSpacing: 0.2,
-    marginTop: 4,
+    color: colors.brand,
   },
 });
