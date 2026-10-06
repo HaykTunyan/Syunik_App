@@ -140,6 +140,18 @@ type RestaurantsScreenProps = {
 };
 
 export function RestaurantsScreen({onBack}: RestaurantsScreenProps) {
+
+  /**
+   * 
+   * RestaurantsScreen is a React component that displays a list of top restaurants in the Syunik region. It includes a back button, a title, an introductory text, and a series of cards showcasing different restaurants with their details such as name, city, region, street, address, phone number, rating, reviews, and status. The component also provides dining tips for visitors. The ScrollView allows users to scroll through the content vertically.
+   * Props:
+   * - onBack: A function that is called when the back button is pressed. This allows the parent component to handle navigation back to the previous screen.
+   * 
+   * The component uses a combination of React Native components such as View, Text, and ScrollView to structure the layout and display the information. Styles are defined using StyleSheet to ensure a consistent and visually appealing design.
+   * 
+   * The topRestaurants array contains hardcoded data for the restaurants, which can be replaced with dynamic data fetched from an API or database in a real-world application.
+   */
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>

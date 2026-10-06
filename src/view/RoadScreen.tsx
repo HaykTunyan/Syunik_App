@@ -49,6 +49,17 @@ const routes: RoadRoute[] = [
 ];
 
 export function RoadScreen({ onBack }: RoadScreenProps) {
+
+    /**
+     * 
+     * RoadScreen is a React component that displays information about the roads and routes in the Syunik region. It includes a back button, a title, an introduction, a map of the region, and a list of popular routes with details such as distance, time, and description. The component uses a ScrollView to allow users to scroll through the content vertically.
+     * Props:
+     * - onBack: A function that is called when the back button is pressed. This allows the parent component to handle navigation back to the previous screen.
+     * 
+     * The component uses the react-native-maps library to display a map of the Syunik region, with markers for key locations. The routes are displayed as cards with color-coded accents for easy identification.
+     */
+
+
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>

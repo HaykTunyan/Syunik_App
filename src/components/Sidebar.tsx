@@ -1,7 +1,8 @@
 import React from 'react';
 import {Modal, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import type {AppScreen} from './AppHeader';
+import {navigationMenuItems} from '../navigation/menuItems';
+import type {AppScreen} from '../navigation/types';
 
 type SidebarProps = {
   isOpen: boolean;
@@ -9,18 +10,6 @@ type SidebarProps = {
   onClose: () => void;
   onSelectScreen: (screen: AppScreen) => void;
 };
-
-const menuItems: Array<{key: AppScreen; label: string; description: string; icon: string}> = [
-  {key: 'home', label: 'Home', description: 'Your Syunik overview', icon: '⌂'},
-  {key: 'about', label: 'About Syunik', description: 'The region, at a glance', icon: 'i'},
-  {key: 'tourism', label: 'Tourism', description: 'Places worth discovering', icon: '⌖'},
-  {key: 'restaurants', label: 'Restaurants', description: 'Taste regional cooking', icon: '◉'},
-  {key: 'roads', label: 'Roads', description: 'Routes across Syunik', icon: '↗'},
-  {key: 'products', label: 'Local products', description: 'Made in Syunik', icon: '✦'},
-  {key: 'history', label: 'History', description: 'Stories and heritage', icon: '◷'},
-  {key: 'contact', label: 'Contact us', description: 'Get in touch with our team', icon: '✉'},
-  {key: 'profile', label: 'My profile', description: 'Manage your travel name', icon: '●'},
-];
 
 export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: SidebarProps) {
   const insets = useSafeAreaInsets();
@@ -62,7 +51,7 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
             style={styles.navigationScroll}
             contentContainerStyle={styles.navigationList}
             showsVerticalScrollIndicator={false}>
-            {menuItems.map(item => {
+            {navigationMenuItems.map(item => {
               const isActive = activeScreen === item.key;
 
               return (

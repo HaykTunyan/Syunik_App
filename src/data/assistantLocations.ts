@@ -50,8 +50,13 @@ export function resolveSyunikDestination(value: string): AssistantDestination | 
   }
 
   matches.sort((a, b) => b.alias.length - a.alias.length || a.index - b.index);
-  const {aliases: _aliases, ...destination} = matches[0].location;
-  return destination;
+  const destination = matches[0].location;
+  return {
+    kind: destination.kind,
+    id: destination.id,
+    title: destination.title,
+    context: destination.context,
+  };
 }
 
 export const supportedDestinationNames = locations.map(location => location.title).filter((name, index, all) => all.indexOf(name) === index);

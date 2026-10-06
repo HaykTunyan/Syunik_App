@@ -95,17 +95,24 @@ Microphone permissions are declared for Android and iOS. Re-run `bundle exec pod
 
 ```text
 src/
-  App.tsx                 Application entry point and navigation shell
+  App.tsx                 Providers and application entry point
   components/             Header, navigation, sidebar, and voice assistant UI
   config/                 Runtime configuration such as the ElevenLabs Agent ID
   data/                   Cities, historical places, and assistant destinations
   features/               Bookings, cart, destinations, and shop features
-  navigation/             Navigation types and navigator implementations
+  navigation/             Typed root stack, tabs, app shell, and navigation ref
   view/                   Main application screens
 android/                  Android native project and launcher resources
 ios/                      iOS native project and AppIcon asset catalog
 scripts/                  Native asset generation helpers
 ```
+
+## Navigation architecture
+
+- The root native stack owns onboarding, city/village details, and drawer-only destinations (About, Contact, History, and Roads). These screens never become hidden tabs.
+- The bottom tab navigator contains only the five primary destinations: Home, Explore, Food, Menu, and Profile. The Menu tab presents every drawer destination as a full-page list of navigation buttons.
+- Screen modules are loaded with `React.lazy` and a `Suspense` fallback, so their JavaScript is evaluated when the user visits the route instead of during app startup. Metro's production delivery settings determine any physical bundle boundaries.
+- Profile state is isolated in `features/profile/context`, leaving `App.tsx` responsible only for provider composition and the root navigator.
 
 ## Quality checks
 

@@ -37,6 +37,15 @@ type ProfileScreenProps = {
 };
 
 export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenProps) {
+
+  /**
+   * 
+   * ProfileScreen is a React component that displays and manages the user's profile information. It includes features such as viewing and editing personal information, managing favorite places, tracking visit history, and adjusting settings like language and notifications. The component uses various hooks to handle state management, data loading, and form handling.
+   * Props:
+   * - name: The user's name, which is displayed in the profile header.
+   */
+
+
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [visits, setVisits] = useState<Visit[]>([]);

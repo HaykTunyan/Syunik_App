@@ -1,4 +1,5 @@
 {
   "name": "SyunikApp",
-  "displayName": "Syunik Dreams"
+  "displayName": "Syunik Dreams",
+  "scheme": "syunikdreams"
 }

@@ -2,8 +2,9 @@ import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {Menu, Mic} from 'lucide-react-native';
 import {colors} from '../config/theme';
+import type {AppScreen} from '../navigation/types';
 
-export type AppScreen = 'home' | 'about' | 'history' | 'contact' | 'tourism' | 'products' | 'roads' | 'restaurants' | 'profile';
+export type {AppScreen} from '../navigation/types';
 
 type AppHeaderProps = {
   activeScreen: AppScreen;
@@ -12,7 +13,7 @@ type AppHeaderProps = {
 };
 
 const screenTitles: Record<AppScreen, string> = {
-  home: 'Discover Armenia’s soul',
+  home: 'Welcome to Syunik',
   about: 'About Syunik',
   history: 'History & Heritage',
   contact: 'Contact Us',
@@ -21,19 +22,30 @@ const screenTitles: Record<AppScreen, string> = {
   roads: 'Roads of Syunik',
   restaurants: 'Taste Syunik',
   profile: 'Your profile',
+  menu: 'Explore Syunik',
 };
 
 export function AppHeader({activeScreen, onOpenMenu, onOpenAssistant}: AppHeaderProps) {
+
+  /**
+   * 
+   * AppHeader is a React component that serves as the header for the Syunik app. It displays the title of the currently active screen and provides buttons for opening the menu and the AI tourist assistant. The component uses React Native's Pressable component for interactive buttons and applies styles to ensure a consistent look and feel across different screens.
+   * 
+   * 
+   */
+
   return (
     <View style={styles.header}>
       <View style={styles.leftSection}>
-        <Pressable
+
+
+        {/* <Pressable
           onPress={onOpenMenu}
           style={styles.menuButton}
           accessibilityRole="button"
           accessibilityLabel="Open menu">
           <Menu size={20} color={colors.text} />
-        </Pressable>
+        </Pressable> */}
         <View>
           <Text style={styles.title}>{screenTitles[activeScreen]}</Text>
           {/* <Text style={styles.subtitle}>Syunik App</Text> */}

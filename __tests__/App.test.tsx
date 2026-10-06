@@ -6,9 +6,32 @@ import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import {Text} from 'react-native';
 import App from '../src/App';
+import {navigationMenuItems} from '../src/navigation/menuItems';
+import {MenuScreen} from '../src/view/MenuScreen';
+
+jest.mock('../src/navigation/RootNavigator', () => {
+  const TestReact = require('react');
+  const {AppHeader} = require('../src/components/AppHeader');
+  const {HomeScreen} = require('../src/view/HomeScreen');
+
+  return {
+    RootNavigator: () =>
+      TestReact.createElement(
+        TestReact.Fragment,
+        null,
+        TestReact.createElement(AppHeader, {
+          activeScreen: 'home',
+          onOpenMenu: jest.fn(),
+          onOpenAssistant: jest.fn(),
+        }),
+        TestReact.createElement(HomeScreen, {contentContainerStyle: {}, onSelectCity: jest.fn()}),
+      ),
+  };
+});
 
 jest.mock('@react-navigation/native', () => ({
   NavigationContainer: ({children}: {children: React.ReactNode}) => children,
+  CommonActions: {navigate: (payload: unknown) => ({type: 'NAVIGATE', payload})},
   useFocusEffect: (effect: () => void | (() => void)) => {
     const TestReact = jest.requireActual<typeof React>('react');
     TestReact.useEffect(effect, [effect]);
@@ -17,33 +40,25 @@ jest.mock('@react-navigation/native', () => ({
     isReady: () => false,
     navigate: jest.fn(),
   }),
-}));
-
-jest.mock('@react-navigation/stack', () => ({
-  createStackNavigator: () => ({
-    Navigator: ({children}: {children: React.ReactNode}) => children,
-    Screen: ({component: Component, children}: {
-      component?: React.ComponentType<any>;
-      children?: React.ReactNode | ((props: {navigation: {navigate: jest.Mock}}) => React.ReactNode);
-    }) =>
-      typeof children === 'function'
-        ? children({navigation: {navigate: jest.fn()}})
-        : Component
-          ? <Component navigation={{navigate: jest.fn()}} />
-          : children,
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    dispatch: jest.fn(),
+    getParent: () => ({navigate: jest.fn(), dispatch: jest.fn()}),
   }),
 }));
 
 test('renders the app home screen content', async () => {
   let renderer: ReactTestRenderer.ReactTestRenderer;
 
-  await ReactTestRenderer.act(() => {
+  await ReactTestRenderer.act(async () => {
     renderer = ReactTestRenderer.create(<App />);
   });
 
   const labels = renderer!.root.findAllByType(Text).map(node => node.props.children);
-  expect(labels).toContain('Discover Armenia’s soul');
+  expect(labels).toContain('Welcome to Syunik');
   expect(labels).toContain('WELCOME TO SYUNIK');
+
+  await ReactTestRenderer.act(() => renderer!.unmount());
 });
 
 test('every city has a most visited place, and Goris highlights Tatev', () => {
@@ -67,4 +82,34 @@ test('every top village has a detail card with gallery, road, and most-visited p
     expect(village.road).toBeTruthy();
     expect(village.mostVisitedPlaces?.length).toBeGreaterThan(0);
   }
+});
+
+test('the Menu tab exposes every drawer destination and opens local products', async () => {
+  const onNavigate = jest.fn();
+  let renderer: ReactTestRenderer.ReactTestRenderer;
+
+  await ReactTestRenderer.act(async () => {
+    renderer = ReactTestRenderer.create(<MenuScreen onNavigate={onNavigate} />);
+  });
+
+  expect(navigationMenuItems.map(item => item.key)).toEqual([
+    'home',
+    'about',
+    'tourism',
+    'restaurants',
+    'roads',
+    'products',
+    'history',
+    'contact',
+    'profile',
+  ]);
+
+  const productButton = renderer!.root.findByProps({
+    accessibilityLabel: 'Local products. Made in Syunik',
+  });
+
+  await ReactTestRenderer.act(() => productButton!.props.onPress());
+  expect(onNavigate).toHaveBeenCalledWith('products');
+
+  await ReactTestRenderer.act(() => renderer!.unmount());
 });

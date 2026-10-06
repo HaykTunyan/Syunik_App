@@ -6,6 +6,13 @@ type InitialScreenProps = {
 };
 
 export function InitialScreen({onFinish}: InitialScreenProps) {
+
+
+  /**
+   * 
+   * InitialScreen is a React component that serves as the initial loading screen for the Syunik app. It displays a background image, an overlay, and animated text elements that introduce the app's theme. The component uses React Native's Animated API to create fade-in and scale-up animations for the content. After a specified duration, it automatically calls the onFinish callback to transition to the next screen.
+   */
+
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.96)).current;
 

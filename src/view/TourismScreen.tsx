@@ -200,6 +200,16 @@ export const topVisitingVillages: VillageSpot[] = [
 ];
 
 export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismScreenProps) {
+
+  /**
+   * 
+   * TourismScreen is a React component that displays information about tourism in the Syunik region. It includes a list of cities and villages, allowing users to explore different locations, view their descriptions, and mark them as favorites. The component uses hooks for state management and navigation, and it provides accessibility features for better user experience.
+   * Props:
+   * - onBack: A function that is called when the back button is pressed. This allows the parent component to handle navigation back to the previous screen.
+   * 
+   */
+
+
   const [selectedCategory, setSelectedCategory] = useState<'All' | 'Cities' | 'Villages'>('All');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoriteMessage, setFavoriteMessage] = useState('');
