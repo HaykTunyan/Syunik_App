@@ -8,7 +8,6 @@ type VillageDetailScreenProps = {
 };
 
 export function VillageDetailScreen({village, onBack}: VillageDetailScreenProps) {
-
   /**
    * 
    * VillageDetailScreen is a React component that displays detailed information about a specific village in the Syunik region. It includes a back button, a hero image, the village's name, location, description, road information, place details, a gallery of images, and a list of most visited places. The component uses a ScrollView to allow users to scroll through the content vertically.
@@ -16,7 +15,6 @@ export function VillageDetailScreen({village, onBack}: VillageDetailScreenProps)
    * - village: A string representing the ID of the village to display details for. This is used to look up the village data from the topVisitingVillages array.
    * 
    */
-
 
   const villageData = topVisitingVillages.find(item => item.id === village);
 

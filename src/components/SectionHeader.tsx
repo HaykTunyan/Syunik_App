@@ -14,6 +14,16 @@ export function SectionHeader({
   actionText,
   onActionPress,
 }: SectionHeaderProps) {
+
+  /**
+   * 
+   * SectionHeader is a React component that renders a header section with a title, optional subtitle, and an optional action button. It is designed to be used in various sections of the app to provide context and navigation options. The component accepts props for the title, subtitle, action text, and a callback function for when the action button is pressed.
+   * 
+   * @param {SectionHeaderProps} props - The properties for the SectionHeader component.
+   * @returns {JSX.Element}
+   * 
+   */
+
   return (
     <View style={styles.container}>
       <View style={styles.titleWrap}>

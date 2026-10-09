@@ -12,6 +12,13 @@ type SidebarProps = {
 };
 
 export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: SidebarProps) {
+
+  /**
+   * 
+   * Sidebar is a React component that renders a navigation drawer for the Syunik app. It displays a list of navigation options, allowing users to switch between different screens of the app. The component uses React Native's Modal for displaying the drawer, Pressable for interactive buttons, and ScrollView for vertical scrolling of the menu items. It also utilizes the useSafeAreaInsets hook to ensure proper padding around the content, especially on devices with notches or rounded corners.
+   * 
+   */
+
   const insets = useSafeAreaInsets();
 
   return (

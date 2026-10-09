@@ -20,6 +20,18 @@ export function SettingsList({
   onChangeLanguage,
   onToggleNotifications,
 }: SettingsListProps) {
+
+
+  /**
+   * 
+   * SettingsList is a React component that renders a list of user settings for the profile screen. It includes options for changing the app's language, toggling notifications, logging out, and deleting the account. The component uses React Native's Pressable and Switch components for interactive elements and applies styles to ensure a consistent look and feel. It also includes accessibility features for better user experience.
+   * 
+   * @param {SettingsListProps} props - The properties for the SettingsList component.
+   * @returns {JSX.Element}
+   * 
+   * 
+   */
+
   const confirmDeleteAccount = () => {
     Alert.alert(profileStrings.settings.deleteTitle, profileStrings.settings.deleteMessage, [
       {text: profileStrings.settings.cancel, style: 'cancel'},
@@ -57,8 +69,11 @@ export function SettingsList({
       <View style={styles.settingRow}>
         <View style={styles.settingHeading}>
           <Bell size={18} color={colors.brand} />
-          <Text style={styles.label}>{profileStrings.settings.notifications}</Text>
+          <Text style={styles.label}>
+            {profileStrings.settings.notifications}
+          </Text>
         </View>
+        <View style={{ alignItems: 'flex-end'}}>
         <Switch
           value={notificationsEnabled}
           onValueChange={onToggleNotifications}
@@ -67,15 +82,17 @@ export function SettingsList({
           accessibilityRole="switch"
           accessibilityLabel={profileStrings.settings.notifications}
         />
+        </View>
       </View>
 
-      <Pressable
+      {/* <Pressable
         onPress={() => Alert.alert(profileStrings.settings.logout, profileStrings.settings.logoutUnavailable)}
         style={({pressed}) => [styles.actionRow, pressed && styles.pressed]}
         accessibilityRole="button">
         <LogOut size={18} color={colors.textSecondary} />
         <Text style={styles.label}>{profileStrings.settings.logout}</Text>
-      </Pressable>
+      </Pressable> */}
+
       <Pressable
         onPress={confirmDeleteAccount}
         style={({pressed}) => [styles.actionRow, pressed && styles.pressed]}
@@ -84,6 +101,7 @@ export function SettingsList({
         <Text style={styles.deleteLabel}>{profileStrings.settings.deleteAccount}</Text>
         <AlertTriangle size={16} color={colors.accent} />
       </Pressable>
+
     </View>
   );
 }
@@ -91,7 +109,13 @@ export function SettingsList({
 const styles = StyleSheet.create({
   section: {marginTop: 32, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border},
   title: {color: colors.text, fontSize: 19, fontWeight: '800', marginBottom: 12},
-  settingRow: {minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.inputBorder},
+  settingRow: {
+    minHeight: 58, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.inputBorder
+  },
   settingHeading: {flexDirection: 'row', alignItems: 'center', gap: 10},
   label: {color: colors.text, fontSize: 14, fontWeight: '700'},
   languageOptions: {flexDirection: 'row', padding: 3, borderRadius: 8, backgroundColor: colors.surface},

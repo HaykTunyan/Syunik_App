@@ -31,7 +31,6 @@ const products: ProductItem[] = [
 ];
 
 export function ProductsScreen({onBack}: ProductsScreenProps) {
-
     /**
      * 
      * ProductsScreen is a React component that displays a list of products related to the Syunik region. It includes a back button, a title, a body of text, and a series of cards showcasing different products with their images, names, prices, sizes, and descriptions. The component uses a ScrollView to allow users to scroll through the content vertically.

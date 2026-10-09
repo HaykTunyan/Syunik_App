@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import DateTimePicker, {type DateTimePickerEvent} from '@react-native-community/datetimepicker';
 import {CalendarDays, MapPin, Plus, Trash2} from 'lucide-react-native';
-import {Alert as NativeAlert, Platform, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Alert as NativeAlert, Platform, Pressable, StyleSheet, Text, type TextInputProps, View} from 'react-native';
 import {colors} from '../../../config/theme';
 import {searchPlaces, type Place} from '../data/places';
 import {profileStrings} from '../strings';
@@ -17,13 +17,14 @@ type VisitHistoryProps = {
   visits: Visit[];
   onAdd: (place: string, visitedAt: Date) => Promise<boolean>;
   onDelete: (id: string) => void;
+  onInputFocus: NonNullable<TextInputProps['onFocus']>;
 };
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat(undefined, {year: 'numeric', month: 'short', day: 'numeric'}).format(date);
 }
 
-export function VisitHistory({visits, onAdd, onDelete}: VisitHistoryProps) {
+export function VisitHistory({visits, onAdd, onDelete, onInputFocus}: VisitHistoryProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
@@ -142,6 +143,8 @@ export function VisitHistory({visits, onAdd, onDelete}: VisitHistoryProps) {
             placeholder={profileStrings.visits.search}
             noResultsText={profileStrings.visits.noMatches}
             suggestions={query === selectedPlace?.name ? [] : searchPlaces(query)}
+            autoFocus
+            onFocus={onInputFocus}
             onChangeQuery={changeQuery}
             onSelect={selectPlace}
           />

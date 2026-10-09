@@ -12,6 +12,18 @@ export function CategoryFilter<T extends string>({
   selectedCategory,
   onSelectCategory,
 }: CategoryFilterProps<T>) {
+
+  /**
+   * 
+   * CategoryFilter is a React component that provides a horizontal scrollable list of categories for filtering content. It takes in an array of categories, the currently selected category, and a callback function to handle category selection. The component uses React Native's ScrollView for horizontal scrolling and Pressable for interactive category buttons. Styles are applied to differentiate between selected and unselected categories, enhancing the user experience.
+   * 
+   * @template T - A string type representing the category names.
+   * @param {CategoryFilterProps<T>} props - The properties for the CategoryFilter component.
+   * @returns {JSX.Element}
+   * 
+   */
+
+
   return (
     <ScrollView
       horizontal

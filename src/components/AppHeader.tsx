@@ -26,11 +26,9 @@ const screenTitles: Record<AppScreen, string> = {
 };
 
 export function AppHeader({activeScreen, onOpenMenu, onOpenAssistant}: AppHeaderProps) {
-
   /**
    * 
    * AppHeader is a React component that serves as the header for the Syunik app. It displays the title of the currently active screen and provides buttons for opening the menu and the AI tourist assistant. The component uses React Native's Pressable component for interactive buttons and applies styles to ensure a consistent look and feel across different screens.
-   * 
    * 
    */
 

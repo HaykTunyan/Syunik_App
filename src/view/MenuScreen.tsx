@@ -9,6 +9,16 @@ type MenuScreenProps = {
 };
 
 export function MenuScreen({onNavigate}: MenuScreenProps) {
+
+  /**
+   * 
+   * Menu Screen is a React component that displays a list of navigation options for the Syunik app. It provides users with buttons to navigate to different sections of the app, such as home, about, history, contact, tourism, products, roads, restaurants, and profile. The component uses React Native's ScrollView for vertical scrolling and Pressable for interactive buttons. Styles are applied to ensure a consistent look and feel across the menu items.
+   * 
+   * @param {MenuScreenProps} props - The properties for the MenuScreen component.
+   * 
+   */
+
+
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.eyebrow}>SYUNIK DREAMS</Text>

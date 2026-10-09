@@ -1,5 +1,14 @@
-import React, {useState} from 'react';
-import {Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 type NamePromptModalProps = {
   visible: boolean;
@@ -10,6 +19,21 @@ type NamePromptModalProps = {
 export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps) {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
+  const inputRef = useRef<TextInput>(null);
+
+  const focusNameInput = useCallback(() => {
+    // A TextInput mounted in a native modal can miss its initial autofocus on
+    // some Android devices. Focusing after the modal is presented is reliable
+    // on both platforms and also opens the system keyboard.
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }, []);
+
+  useEffect(() => {
+    if (visible) {
+      focusNameInput();
+    }
+  }, [focusNameInput, visible]);
+
   const save = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
@@ -23,20 +47,30 @@ export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps)
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onSkip}>
-      <View style={styles.overlay}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onSkip}
+      onShow={focusNameInput}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.card}>
           <Text style={styles.eyebrow}>WELCOME TO SYUNIK</Text>
           <Text style={styles.title}>What should we call you?</Text>
           <Text style={styles.description}>Tell us your name to make your travel companion feel more personal.</Text>
           {!!message && <Text style={styles.errorMessage}>{message}</Text>}
           <TextInput
+            ref={inputRef}
             autoFocus
             value={name}
             onChangeText={setName}
             placeholder="Your name"
             placeholderTextColor="#9a9a92"
             autoCapitalize="words"
+            showSoftInputOnFocus
+            onSubmitEditing={save}
             style={styles.input}
           />
           <Pressable onPress={save} disabled={!name.trim()} style={[styles.saveButton, !name.trim() && styles.disabledButton]}>
@@ -46,7 +80,7 @@ export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps)
             <Text style={styles.skipText}>Maybe later</Text>
           </Pressable>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

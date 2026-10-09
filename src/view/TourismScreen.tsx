@@ -169,12 +169,12 @@ export const topVisitingVillages: VillageSpot[] = [
     road: 'The road to Shikahogh follows the Kapan mountain route, where the landscape becomes more rolling and wooded before reaching the village.',
     place: 'The village’s surrounding valley, local landscape, and nearby viewpoints are the main points of interest for visitors seeking a calm and authentic stop.',
     gallery: [
-      require('../assets/images/for-travel/old_goris.png'),
+      require('../assets/images/for-travel/shikahox-view.png'),
       require('../assets/images/for-travel/syuniks_gate.png'),
       require('../assets/images/syunik_landscape.png'),
     ],
     mostVisitedPlaces: [
-      {id: 'shikahogh-view', title: 'Shikahogh Viewpoint', image: require('../assets/images/for-travel/old_goris.png')},
+      {id: 'shikahogh-view', title: 'Shikahogh Viewpoint', image: require('../assets/images/for-travel/shikahox-view.png')},
       {id: 'shikahogh-valley', title: 'Village Valley', image: require('../assets/images/syunik_landscape.png')},
     ],
   },
@@ -208,7 +208,6 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
    * - onBack: A function that is called when the back button is pressed. This allows the parent component to handle navigation back to the previous screen.
    * 
    */
-
 
   const [selectedCategory, setSelectedCategory] = useState<'All' | 'Cities' | 'Villages'>('All');
   const [favorites, setFavorites] = useState<string[]>([]);

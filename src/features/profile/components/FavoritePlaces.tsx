@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Compass, Heart, X} from 'lucide-react-native';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {Pressable, StyleSheet, Text, type TextInputProps, View} from 'react-native';
 import {colors} from '../../../config/theme';
 import {searchPlaces, type Place} from '../data/places';
 import {profileStrings} from '../strings';
@@ -11,9 +11,10 @@ type FavoritePlacesProps = {
   onAdd: (place: Place) => void;
   onRemove: (place: string) => void;
   onBrowsePlaces: () => void;
+  onInputFocus: NonNullable<TextInputProps['onFocus']>;
 };
 
-export function FavoritePlaces({favorites, onAdd, onRemove, onBrowsePlaces}: FavoritePlacesProps) {
+export function FavoritePlaces({favorites, onAdd, onRemove, onBrowsePlaces, onInputFocus}: FavoritePlacesProps) {
   const [query, setQuery] = useState('');
 
   const selectPlace = (place: Place) => {
@@ -34,6 +35,7 @@ export function FavoritePlaces({favorites, onAdd, onRemove, onBrowsePlaces}: Fav
         placeholder={profileStrings.favorites.search}
         noResultsText={profileStrings.favorites.noMatches}
         suggestions={searchPlaces(query)}
+        onFocus={onInputFocus}
         onChangeQuery={setQuery}
         onSelect={selectPlace}
       />

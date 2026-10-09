@@ -43,6 +43,15 @@ type VoiceAssistantProviderProps = {
 };
 
 export function VoiceAssistantProvider({children, onNavigate}: VoiceAssistantProviderProps) {
+
+  /***
+   * VoiceAssistantProvider is a React component that provides context and state management for the AI tourist assistant feature in the Syunik app. It uses the ElevenLabs SDK to manage voice conversations and interactions with the assistant. The provider maintains the visibility of the assistant modal, the current page context, the conversation transcript, and handles navigation requests from the assistant. It also provides functions to open the assistant and update the page context, which can be accessed by child components through the VoiceAssistantContext.
+   * 
+   * @param {VoiceAssistantProviderProps} props - The properties for the VoiceAssistantProvider component.
+   * 
+   */
+
+
   return (
     <ConversationProvider agentId={ELEVENLABS_AGENT_ID}>
       <VoiceAssistantController onNavigate={onNavigate}>{children}</VoiceAssistantController>

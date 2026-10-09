@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {
@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  type TextInputProps,
 } from 'react-native';
 import {ProfileHeader} from '../features/profile/components/ProfileHeader';
 import {StatsRow} from '../features/profile/components/StatsRow';
@@ -54,6 +55,8 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
   const [language, setLanguage] = useState<ProfileLanguage>('EN');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [message, setMessage] = useState('');
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollOffset = useRef(0);
   const {
     values,
     errors,
@@ -78,6 +81,8 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
   const loadProfile = useCallback(async () => {
     setIsProfileDataLoaded(false);
     setLoadingError('');
+
+    
     try {
       const stored = await loadStoredProfileData();
       hydrate({
@@ -232,15 +237,43 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
     }
   };
 
+  const scrollFocusedInputIntoView = useCallback<NonNullable<TextInputProps['onFocus']>>(
+    event => {
+      const input = event.currentTarget;
+
+      // Wait for the keyboard resize animation, then place the input near the
+      // top of the visible area. This works for fields deep in the profile on
+      // both iOS and Android.
+      setTimeout(() => {
+        input.measureInWindow((_x, y) => {
+          const inputTop = 120;
+          const distanceToScroll = y - inputTop;
+          if (distanceToScroll > 0) {
+            scrollRef.current?.scrollTo({
+              y: scrollOffset.current + distanceToScroll,
+              animated: true,
+            });
+          }
+        });
+      }, 180);
+    },
+    [],
+  );
+
   return (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingView}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag">
+        keyboardDismissMode="on-drag"
+        onScroll={event => {
+          scrollOffset.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}>
       {!isProfileDataLoaded ? (
         <ProfileSkeleton />
       ) : loadingError ? (
@@ -260,14 +293,21 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
             onBeginEditing={beginEditing}
             onCancel={cancelEditing}
             onSave={saveProfile}
+            onInputFocus={scrollFocusedInputIntoView}
           />
           <FavoritePlaces
             favorites={favorites}
             onAdd={addFavorite}
             onRemove={removeFavorite}
             onBrowsePlaces={onBrowsePlaces}
+            onInputFocus={scrollFocusedInputIntoView}
           />
-          <VisitHistory visits={visits} onAdd={addVisit} onDelete={removeVisit} />
+          <VisitHistory
+            visits={visits}
+            onAdd={addVisit}
+            onDelete={removeVisit}
+            onInputFocus={scrollFocusedInputIntoView}
+          />
           <SettingsList
             language={language}
             notificationsEnabled={notificationsEnabled}

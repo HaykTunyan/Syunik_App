@@ -1,6 +1,14 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {MapPin} from 'lucide-react-native';
-import {Pressable, ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  type TextInputProps,
+  View,
+} from 'react-native';
 import {colors} from '../../../config/theme';
 import type {Place} from '../data/places';
 
@@ -10,6 +18,8 @@ type PlaceSearchInputProps = {
   placeholder: string;
   noResultsText: string;
   suggestions: Place[];
+  autoFocus?: boolean;
+  onFocus?: TextInputProps['onFocus'];
   onChangeQuery: (query: string) => void;
   onSelect: (place: Place) => void;
 };
@@ -20,17 +30,34 @@ export function PlaceSearchInput({
   placeholder,
   noResultsText,
   suggestions,
+  autoFocus = false,
+  onFocus,
   onChangeQuery,
   onSelect,
 }: PlaceSearchInputProps) {
+  const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (!autoFocus) {
+      return;
+    }
+
+    const focusTimer = setTimeout(() => inputRef.current?.focus(), 100);
+    return () => clearTimeout(focusTimer);
+  }, [autoFocus]);
+
   return (
     <View style={styles.container}>
       <TextInput
+        ref={inputRef}
+        autoFocus={autoFocus}
         value={query}
         onChangeText={onChangeQuery}
         placeholder={placeholder}
         placeholderTextColor={colors.textMuted}
         returnKeyType="search"
+        showSoftInputOnFocus
+        onFocus={onFocus}
         style={styles.input}
         accessibilityLabel={label}
       />

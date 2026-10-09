@@ -16,6 +16,14 @@ type AttractionsCarouselProps = {
 const ASPECT_RATIO = 16 / 9;
 
 export function AttractionsCarousel({ attractions }: AttractionsCarouselProps) {
+
+  /**
+   * 
+   * AttractionsCarousel is a React component that displays a carousel of attractions for a specific city. It takes an array of attractions as a prop and renders them in a horizontally scrollable carousel format. The component calculates the height of the carousel based on the width and a predefined aspect ratio. It also handles layout changes to ensure the carousel adjusts its size correctly when the device orientation changes or when the screen size changes.
+   * 
+   */
+
+
   const [carouselWidth, setCarouselWidth] = useState(0);
 
   const carouselHeight = carouselWidth / ASPECT_RATIO;

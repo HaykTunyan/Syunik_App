@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {ChevronDown, Pencil, Save, X} from 'lucide-react-native';
 import {
   Modal,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputProps,
   View,
 } from 'react-native';
 import {colors} from '../../../config/theme';
@@ -24,6 +25,7 @@ type PersonalInfoCardProps = {
   onBeginEditing: () => void;
   onCancel: () => void;
   onSave: () => void;
+  onInputFocus: NonNullable<TextInputProps['onFocus']>;
 };
 
 function formatPhone(digits: string): string {
@@ -47,9 +49,22 @@ export function PersonalInfoCard({
   onBeginEditing,
   onCancel,
   onSave,
+  onInputFocus,
 }: PersonalInfoCardProps) {
   const [isCountryPickerOpen, setIsCountryPickerOpen] = useState(false);
+  const nameInputRef = useRef<TextInput>(null);
   const selectedCountry = phoneCountries.find(country => country.dialCode === values.countryCode) ?? phoneCountries[0];
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    // Let the edit controls finish rendering before requesting focus. This
+    // consistently brings up the iOS and Android system keyboards.
+    const focusTimer = setTimeout(() => nameInputRef.current?.focus(), 100);
+    return () => clearTimeout(focusTimer);
+  }, [isEditing]);
 
   const selectCountry = (country: PhoneCountry) => {
     onChange('countryCode', country.dialCode);
@@ -62,12 +77,15 @@ export function PersonalInfoCard({
       <Text style={styles.title}>{profileStrings.personalInfo.title}</Text>
       <Text style={styles.label}>{profileStrings.personalInfo.name}</Text>
       <TextInput
+        ref={nameInputRef}
         value={values.name}
         onChangeText={value => onChange('name', value)}
         editable={isEditing && !isSaving}
         placeholder={profileStrings.personalInfo.namePlaceholder}
         placeholderTextColor={colors.textMuted}
         autoCapitalize="words"
+        showSoftInputOnFocus
+        onFocus={onInputFocus}
         style={[styles.input, !isEditing && styles.readOnlyInput, errors.name && styles.invalidInput]}
         accessibilityLabel={profileStrings.personalInfo.name}
       />
@@ -83,6 +101,8 @@ export function PersonalInfoCard({
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
+        showSoftInputOnFocus
+        onFocus={onInputFocus}
         style={[styles.input, !isEditing && styles.readOnlyInput, errors.email && styles.invalidInput]}
         accessibilityLabel={profileStrings.personalInfo.email}
       />
@@ -107,6 +127,8 @@ export function PersonalInfoCard({
           placeholderTextColor={colors.textMuted}
           autoComplete="tel-national"
           keyboardType="phone-pad"
+          showSoftInputOnFocus
+          onFocus={onInputFocus}
           style={styles.phoneInput}
           accessibilityLabel={profileStrings.personalInfo.phone}
         />

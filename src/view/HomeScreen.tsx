@@ -175,10 +175,13 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
             onChangeText={setQuery}
             placeholder="Search cities…"
             placeholderTextColor="#9aa58c"
+            showSoftInputOnFocus
             style={styles.searchInput}
             onFocus={() => {
               setIsSearchFocused(true);
-              scrollRef.current?.scrollTo({y: 0, animated: true});
+              // Keep the search field above the soft keyboard rather than
+              // behind the hero image while the keyboard is opening.
+              scrollRef.current?.scrollTo({y: 280, animated: true});
             }}
             onBlur={() => setIsSearchFocused(false)}
             onSubmitEditing={() => {
@@ -227,11 +230,14 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
                   </Pressable>
                 ))}
               </>
-            ) : (
-              <View style={styles.noSuggestions}>
-                <Text style={styles.noSuggestionsText}>No matching city in Syunik</Text>
-              </View>
-            )}
+            ) : null
+            // : 
+            // (
+            //   <View style={styles.noSuggestions}>
+            //     <Text style={styles.noSuggestionsText}>No matching city in Syunik</Text>
+            //   </View>
+            // )
+            }
           </View>
         )}
       </View>

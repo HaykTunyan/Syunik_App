@@ -14,6 +14,7 @@ import {CategoryFilter} from '../components/CategoryFilter';
 import { citiesData } from '../data/citiesData';
 import { historicalPlacesByCity } from '../data/historicalPlaces';
 
+
 type CityDetailScreenProps = {
   city: string;
   onBack: () => void;
@@ -25,7 +26,9 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
    */
 
   const cityData = citiesData.find(c => c.latinName === city);
+
   const historicalPlaces = historicalPlacesByCity.find(item => item.city === city)?.places ?? [];
+
   const [selectedCategory, setSelectedCategory] = useState<
     'Overview' | 'Places' | 'Details' | 'Attractions' | 'History'
   >('Overview');
@@ -53,6 +56,7 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       />
       <Text style={styles.title}>{cityData.latinName}</Text>
       <Text style={styles.description}>{cityData.description}</Text>
+
       <CategoryFilter
         categories={['Overview', 'Places', 'Details', 'Attractions', 'History'] as const}
         selectedCategory={selectedCategory}
@@ -371,6 +375,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 9,
+    paddingHorizontal: 10,
   },
   infoLabel: {
     color: '#5f5f5f',
