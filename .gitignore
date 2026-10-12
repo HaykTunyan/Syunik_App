@@ -22,8 +22,7 @@ DerivedData
 *.xcuserstate
 **/.xcode.env.local
 
-**/GoogleService-Info.plist
-**/google-services.json
+
 
 # Android/IntelliJ
 #
@@ -37,6 +36,22 @@ local.properties
 *.keystore
 !debug.keystore
 .kotlin/
+
+
+# Firebase config (contains API keys)
+**/GoogleService-Info.plist
+**/google-services.json
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local agent settings (personal)
+.claude/settings.local.json
+
+# Logs
+*.log
 
 # node.js
 #
