@@ -1,3 +1,7 @@
+# Disable React Native Firebase Swift Package Manager integration
+$RNFirebaseDisableSPM = true
+
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -14,6 +18,9 @@ if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
 end
+
+$RNFirebaseAsStaticFramework = true
+use_modular_headers!
 
 target 'SyunikApp' do
   config = use_native_modules!

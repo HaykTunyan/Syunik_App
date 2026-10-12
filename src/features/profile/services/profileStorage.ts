@@ -116,6 +116,10 @@ export async function loadFavorites(): Promise<string[]> {
   return parseStringList(await AsyncStorage.getItem(keys.favorites));
 }
 
+export async function loadNotificationsEnabled(): Promise<boolean> {
+  return (await AsyncStorage.getItem(keys.notifications)) === 'true';
+}
+
 export async function toggleFavorite(place: string): Promise<boolean> {
   const favorites = await loadFavorites();
   const normalizedPlace = place.trim();

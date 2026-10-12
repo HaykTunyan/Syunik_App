@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env*)",
+      "Read(./node_modules/**)",
+      "Read(./ios/Pods/**)",
+      "Read(./ios/build/**)",
+      "Read(./android/build/**)",
+      "Read(./android/app/build/**)",
+      "Read(./android/.gradle/**)",
+      "Read(./coverage/**)",
+      "Read(./package-lock.json)",
+      "Read(./android/app/google-services.json)",
+      "Read(./ios/**/GoogleService-Info.plist)",
+      "Read(./**/*.keystore)"
+    ],
+    "allow": [
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint)",
+      "Bash(npx jest:*)"
+    ]
+  }
+}

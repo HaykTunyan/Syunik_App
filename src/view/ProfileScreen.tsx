@@ -29,6 +29,7 @@ import {
   saveVisits,
   type ProfileLanguage,
 } from '../features/profile/services/profileStorage';
+import {setFirebaseNotificationsEnabled} from '../services/notificationService';
 import {colors} from '../config/theme';
 
 type ProfileScreenProps = {
@@ -97,6 +98,17 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
       setLanguage(stored.language);
       setNotificationsEnabled(stored.notificationsEnabled);
       setMessage('');
+      if (stored.notificationsEnabled) {
+        try {
+          const isFirebaseEnabled = await setFirebaseNotificationsEnabled(true, false);
+          if (!isFirebaseEnabled) {
+            await saveProfileSettings(stored.language, false);
+            setNotificationsEnabled(false);
+          }
+        } catch {
+          setMessage(profileStrings.settings.notificationsSaveError);
+        }
+      }
     } catch {
       setLoadingError(profileStrings.common.loadError);
     } finally {
@@ -230,10 +242,17 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
 
   const updateNotifications = async (enabled: boolean) => {
     try {
-      await saveProfileSettings(language, enabled);
-      setNotificationsEnabled(enabled);
+      const isFirebaseEnabled = await setFirebaseNotificationsEnabled(enabled);
+      if (enabled && !isFirebaseEnabled) {
+        setMessage(profileStrings.settings.notificationsPermissionRequired);
+        return;
+      }
+
+      await saveProfileSettings(language, isFirebaseEnabled);
+      setNotificationsEnabled(isFirebaseEnabled);
+      setMessage('');
     } catch {
-      setMessage(profileStrings.settings.saveError);
+      setMessage(profileStrings.settings.notificationsSaveError);
     }
   };
 

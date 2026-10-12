@@ -1,0 +1,19 @@
+{
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/ios/Pods": true,
+    "**/ios/build": true,
+    "**/android/build": true,
+    "**/android/.gradle": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/ios/Pods": true,
+    "**/ios/build": true,
+    "**/android/build": true,
+    "**/android/.gradle": true,
+    "**/package-lock.json": true
+  }
+}

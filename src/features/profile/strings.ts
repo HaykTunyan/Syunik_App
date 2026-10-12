@@ -80,6 +80,8 @@ export const profileStrings = {
     logoutUnavailable: 'There is no signed-in account to log out.',
     deleteUnavailable: 'Account deletion is unavailable until an account service is connected.',
     saveError: 'Could not save settings. Please try again.',
+    notificationsPermissionRequired: 'Allow notifications in iOS Settings to turn on Firebase notifications.',
+    notificationsSaveError: 'Could not update Firebase notifications. Please try again.',
   },
   common: {
     retry: 'Retry',
