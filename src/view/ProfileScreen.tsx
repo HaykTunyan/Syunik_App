@@ -1,9 +1,14 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
+import {MapPin} from 'lucide-react-native';
 import {
+  NativeModules,
+  PermissionsAndroid,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  Share,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,6 +24,7 @@ import {VisitHistory, type Visit} from '../features/profile/components/VisitHist
 import {ProfileErrorState, ProfileSkeleton} from '../features/profile/components/ProfileLoadingState';
 import {SettingsList} from '../features/profile/components/SettingsList';
 import type {Place} from '../features/profile/data/places';
+import type {GeoPosition} from 'react-native-geolocation-service';
 import {
   loadProfileData as loadStoredProfileData,
   loadFavorites,
@@ -36,9 +42,15 @@ type ProfileScreenProps = {
   name: string;
   onSaveName: (name: string) => Promise<void>;
   onBrowsePlaces: () => void;
+  onOpenMyTrips: () => void;
 };
 
-export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenProps) {
+export function ProfileScreen({
+  name,
+  onSaveName,
+  onBrowsePlaces,
+  onOpenMyTrips,
+}: ProfileScreenProps) {
 
   /**
    * 
@@ -55,6 +67,7 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
   const [loadingError, setLoadingError] = useState('');
   const [language, setLanguage] = useState<ProfileLanguage>('EN');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(false);
   const [message, setMessage] = useState('');
   const scrollRef = useRef<ScrollView>(null);
   const scrollOffset = useRef(0);
@@ -256,6 +269,118 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
     }
   };
 
+  const updateLocationAccess = async (enabled: boolean) => {
+    if (!enabled) {
+      setLocationEnabled(false);
+      return;
+    }
+
+    try {
+      if (!NativeModules.RNFusedLocation) {
+        setLocationEnabled(false);
+        setMessage(profileStrings.settings.locationServiceUnavailable);
+        return;
+      }
+
+      if (Platform.OS === 'android') {
+        const permission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: profileStrings.settings.locationAccess,
+            message: profileStrings.settings.locationPermissionRequired,
+            buttonPositive: 'Allow',
+            buttonNegative: 'Not now',
+          },
+        );
+        const granted = permission === PermissionsAndroid.RESULTS.GRANTED;
+        setLocationEnabled(granted);
+        setMessage(
+          granted ? '' : profileStrings.settings.locationPermissionRequired,
+        );
+        return;
+      }
+
+      if (Platform.OS === 'ios') {
+        const {default: Geolocation} = await import(
+          'react-native-geolocation-service'
+        );
+        const authorization = await Geolocation.requestAuthorization('whenInUse');
+        const granted = authorization === 'granted';
+        setLocationEnabled(granted);
+        setMessage(
+          granted ? '' : profileStrings.settings.locationPermissionRequired,
+        );
+      }
+    } catch (error) {
+      console.error('Could not request location access.', error);
+      setLocationEnabled(false);
+      setMessage(profileStrings.settings.locationPermissionError);
+    }
+  };
+
+  const shareCurrentLocation = async () => {
+    try {
+      if (!locationEnabled) {
+        setMessage(profileStrings.settings.locationPermissionRequired);
+        return;
+      }
+      if (!NativeModules.RNFusedLocation) {
+        setMessage(profileStrings.settings.locationServiceUnavailable);
+        return;
+      }
+      const {default: Geolocation} = await import(
+        'react-native-geolocation-service'
+      );
+
+      if (Platform.OS === 'android') {
+        const permission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: profileStrings.settings.shareLocation,
+            message: profileStrings.settings.locationPermissionRequired,
+            buttonPositive: 'Allow',
+            buttonNegative: 'Not now',
+          },
+        );
+        if (permission !== PermissionsAndroid.RESULTS.GRANTED) {
+          setMessage(profileStrings.settings.locationPermissionRequired);
+          return;
+        }
+      } else if (
+        Platform.OS === 'ios' &&
+        (await Geolocation.requestAuthorization('whenInUse')) !== 'granted'
+      ) {
+        setMessage(profileStrings.settings.locationPermissionRequired);
+        return;
+      }
+
+      let position: GeoPosition;
+      try {
+        position = await new Promise<GeoPosition>((resolve, reject) => {
+          Geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 10000,
+          });
+        });
+      } catch (error) {
+        console.error('Could not retrieve current location.', error);
+        setMessage(profileStrings.settings.locationUnavailable);
+        return;
+      }
+      const mapUrl = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+      await Share.share({
+        title: profileStrings.settings.shareLocationTitle,
+        message: `${profileStrings.settings.shareLocationTitle}: ${mapUrl}`,
+        url: mapUrl,
+      });
+      setMessage('');
+    } catch (error) {
+      console.error('Could not share current location.', error);
+      setMessage(profileStrings.settings.locationShareError);
+    }
+  };
+
   const scrollFocusedInputIntoView = useCallback<NonNullable<TextInputProps['onFocus']>>(
     event => {
       const input = event.currentTarget;
@@ -301,6 +426,14 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
         <>
           <ProfileHeader name={values.name} photoUri={photoUri} onChoosePhoto={chooseProfilePhoto} />
           <Text style={styles.description}>{profileStrings.description}</Text>
+          <Pressable
+            onPress={onOpenMyTrips}
+            style={({pressed}) => [styles.myTripsButton, pressed && styles.pressed]}
+            accessibilityRole="button"
+            accessibilityLabel="Open My Trips">
+            <MapPin size={19} color={colors.white} />
+            <Text style={styles.myTripsButtonText}>My Trips</Text>
+          </Pressable>
           <StatsRow visited={visits.length} favorites={favorites.length} badges={0} />
           <PersonalInfoCard
             values={values}
@@ -330,8 +463,11 @@ export function ProfileScreen({name, onSaveName, onBrowsePlaces}: ProfileScreenP
           <SettingsList
             language={language}
             notificationsEnabled={notificationsEnabled}
+            locationEnabled={locationEnabled}
             onChangeLanguage={updateLanguage}
             onToggleNotifications={updateNotifications}
+            onToggleLocation={updateLocationAccess}
+            onShareLocation={shareCurrentLocation}
           />
         </>
       )}
@@ -346,5 +482,8 @@ const styles = StyleSheet.create({
   scrollView: {flex: 1},
   container: {flexGrow: 1, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 140, backgroundColor: colors.background},
   description: {color: colors.textSecondary, fontSize: 15, lineHeight: 22, marginTop: 10, marginBottom: 24},
+  myTripsButton: {alignItems: 'center', alignSelf: 'flex-start', backgroundColor: colors.brand, borderRadius: 10, flexDirection: 'row', gap: 8, justifyContent: 'center', marginTop: -10, marginBottom: 22, minHeight: 44, paddingHorizontal: 14},
+  myTripsButtonText: {color: colors.white, fontSize: 14, fontWeight: '700'},
+  pressed: {opacity: 0.75},
   message: {color: colors.brand, fontSize: 13, marginTop: 18},
 });

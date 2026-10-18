@@ -25,6 +25,7 @@ export type MenuStackParamList = {
   History: undefined;
   Roads: undefined;
   Products: undefined;
+  MyTrips: undefined;
 };
 
 export type RootStackParamList = {
@@ -41,5 +42,6 @@ export type AppScreen =
   | 'products'
   | 'roads'
   | 'restaurants'
+  | 'myTrips'
   | 'profile'
   | 'menu';

@@ -30,6 +30,8 @@ function getIOSMessaging(): Messaging | null {
   return Platform.OS === 'ios' ? getMessaging() : null;
 }
 
+let remoteMessagesRegistration: Promise<void> | null = null;
+
 export function subscribeToForegroundNotifications(): () => void {
   const messaging = getIOSMessaging();
   if (!messaging) {
@@ -71,11 +73,26 @@ export async function getInitialNotification(): Promise<RemoteMessage | null> {
 
 async function registerIfNeeded(messaging: Messaging): Promise<void> {
   if (
-    Platform.OS === 'ios' &&
-    !messaging.isDeviceRegisteredForRemoteMessages
+    Platform.OS !== 'ios' ||
+    messaging.isDeviceRegisteredForRemoteMessages
   ) {
-    await messaging.registerDeviceForRemoteMessages();
+    return;
   }
+
+  if (!remoteMessagesRegistration) {
+    const registration = messaging.registerDeviceForRemoteMessages();
+    remoteMessagesRegistration = registration;
+    try {
+      await registration;
+    } finally {
+      if (remoteMessagesRegistration === registration) {
+        remoteMessagesRegistration = null;
+      }
+    }
+    return;
+  }
+
+  await remoteMessagesRegistration;
 }
 
 export async function requestNotificationPermission(): Promise<boolean> {

@@ -21,6 +21,7 @@ const screenTitles: Record<AppScreen, string> = {
   products: 'Local Products',
   roads: 'Roads of Syunik',
   restaurants: 'Taste Syunik',
+  myTrips: 'My Trips',
   profile: 'Your profile',
   menu: 'Explore Syunik',
 };

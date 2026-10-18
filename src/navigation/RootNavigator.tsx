@@ -10,9 +10,10 @@ import {
   createBottomTabNavigator,
   type BottomTabNavigationOptions,
 } from '@react-navigation/bottom-tabs';
-import {Compass, Home, Menu, Utensils, UserRound, type LucideIcon} from 'lucide-react-native';
+import {Compass, Home, Menu, Mic, UserRound, type LucideIcon} from 'lucide-react-native';
 import {colors} from '../config/theme';
 import {useProfile} from '../features/profile/context/ProfileProvider';
+import {useVoiceAssistant} from '../components/VoiceAssistant';
 import {AppShell} from './AppShell';
 import type {
   AppScreen,
@@ -62,6 +63,9 @@ const LazyRestaurantsScreen = lazy(() =>
 const LazyProfileScreen = lazy(() =>
   import('../view/ProfileScreen').then(module => ({default: module.ProfileScreen})),
 );
+const LazyMyTripsScreen = lazy(() =>
+  import('../view/MyTripsScreen').then(module => ({default: module.MyTripsScreen})),
+);
 const LazyCityDetailScreen = lazy(() =>
   import('../view/CityDetailsScreen').then(module => ({default: module.CityDetailScreen})),
 );
@@ -76,6 +80,7 @@ const appDestinations: Record<AppScreen, AppDestination> = {
   home: {tab: 'Home'},
   tourism: {tab: 'Explore'},
   restaurants: {tab: 'Food'},
+  myTrips: {tab: 'Menu', screen: 'MyTrips'},
   products: {tab: 'Menu', screen: 'Products'},
   profile: {tab: 'Profile'},
   menu: {tab: 'Menu'},
@@ -99,6 +104,8 @@ export function RootNavigator({onInitialComplete}: {onInitialComplete: () => voi
 }
 
 function MainTabNavigator() {
+  const {openAssistant, updatePageContext} = useVoiceAssistant();
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -117,7 +124,21 @@ function MainTabNavigator() {
       })}>
       <Tab.Screen name="Home" component={HomeNavigator} />
       <Tab.Screen name="Explore" component={ExploreNavigator} />
-      <Tab.Screen name="Food" component={FoodRoute} />
+      <Tab.Screen
+        name="Food"
+        component={FoodRoute}
+        listeners={{
+          tabPress: event => {
+            event.preventDefault();
+            const context = {
+              page: 'assistant',
+              title: 'AI tourist assistant in Syunik Dreams',
+            };
+            updatePageContext(context);
+            openAssistant(context);
+          },
+        }}
+      />
       <Tab.Screen name="Menu" component={MenuNavigator} />
       <Tab.Screen name="Profile" component={ProfileRoute} />
     </Tab.Navigator>
@@ -151,6 +172,7 @@ function MenuNavigator() {
       <MenuStack.Screen name="History" component={HistoryRoute} />
       <MenuStack.Screen name="Roads" component={RoadsRoute} />
       <MenuStack.Screen name="Products" component={ProductsRoute} />
+      <MenuStack.Screen name="MyTrips" component={MyTripsRoute} />
     </MenuStack.Navigator>
   );
 }
@@ -234,7 +256,27 @@ function ProfileRoute() {
           name={name}
           onSaveName={saveName}
           onBrowsePlaces={() => navigateToAppScreen(navigation, 'tourism')}
+          onOpenMyTrips={() => navigation.navigate('Menu', {screen: 'MyTrips'})}
         />
+      </DeferredScreen>
+    </AppShell>
+  );
+}
+
+function MyTripsRoute({
+  navigation,
+}: NativeStackScreenProps<MenuStackParamList, 'MyTrips'>) {
+  return (
+    <AppShell
+      activeScreen="myTrips"
+      onNavigate={screen => navigateFromMenu(navigation, screen)}
+      assistantContext={{
+        page: 'my-trips',
+        title: 'My travel plans in Syunik',
+        detail: 'Planned destinations, visit times, and restaurant stops.',
+      }}>
+      <DeferredScreen>
+        <LazyMyTripsScreen onBack={() => navigation.goBack()} />
       </DeferredScreen>
     </AppShell>
   );
@@ -398,7 +440,7 @@ function LoadingScreen() {
 const tabIcons: Record<keyof MainTabParamList, LucideIcon> = {
   Home,
   Explore: Compass,
-  Food: Utensils,
+  Food: Mic,
   Menu,
   Profile: UserRound,
 };
@@ -406,7 +448,7 @@ const tabIcons: Record<keyof MainTabParamList, LucideIcon> = {
 const tabLabels: Record<keyof MainTabParamList, string> = {
   Home: 'Home',
   Explore: 'Trips',
-  Food: 'Food',
+  Food: 'Assistant',
   Menu: 'Menu',
   Profile: 'Profile',
 };

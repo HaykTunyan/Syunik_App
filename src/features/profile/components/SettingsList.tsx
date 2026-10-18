@@ -1,5 +1,5 @@
 import React from 'react';
-import {AlertTriangle, Bell, Languages, LogOut, Trash2} from 'lucide-react-native';
+import {AlertTriangle, Bell, Languages, MapPin, Trash2} from 'lucide-react-native';
 import {Alert, Pressable, StyleSheet, Switch, Text, View} from 'react-native';
 import {colors} from '../../../config/theme';
 import type {ProfileLanguage} from '../services/profileStorage';
@@ -8,8 +8,11 @@ import {profileStrings} from '../strings';
 type SettingsListProps = {
   language: ProfileLanguage;
   notificationsEnabled: boolean;
+  locationEnabled: boolean;
   onChangeLanguage: (language: ProfileLanguage) => void;
   onToggleNotifications: (enabled: boolean) => void;
+  onToggleLocation: (enabled: boolean) => void;
+  onShareLocation: () => void;
 };
 
 const languages: ProfileLanguage[] = ['HY', 'EN', 'RU'];
@@ -17,8 +20,11 @@ const languages: ProfileLanguage[] = ['HY', 'EN', 'RU'];
 export function SettingsList({
   language,
   notificationsEnabled,
+  locationEnabled,
   onChangeLanguage,
   onToggleNotifications,
+  onToggleLocation,
+  onShareLocation,
 }: SettingsListProps) {
 
 
@@ -85,6 +91,47 @@ export function SettingsList({
         </View>
       </View>
 
+      <View style={styles.settingRow}>
+        <View style={styles.settingHeading}>
+          <MapPin size={18} color={colors.brand} />
+          <Text style={styles.label}>
+            {profileStrings.settings.locationAccess}
+          </Text>
+        </View>
+        <Switch
+          value={locationEnabled}
+          onValueChange={onToggleLocation}
+          trackColor={{false: colors.inputBorder, true: colors.brandSoft}}
+          thumbColor={locationEnabled ? colors.brand : colors.surface}
+          accessibilityRole="switch"
+          accessibilityLabel={profileStrings.settings.locationAccess}
+        />
+      </View>
+
+      <Pressable
+        onPress={onShareLocation}
+        disabled={!locationEnabled}
+        style={({pressed}) => [
+          styles.actionRow,
+          !locationEnabled && styles.disabledAction,
+          pressed && locationEnabled && styles.pressed,
+        ]}
+        accessibilityRole="button"
+        accessibilityState={{disabled: !locationEnabled}}
+        accessibilityLabel={profileStrings.settings.shareLocation}>
+        <MapPin
+          size={18}
+          color={locationEnabled ? colors.brand : colors.textSecondary}
+        />
+        <Text
+          style={[
+            styles.label,
+            !locationEnabled && styles.disabledActionText,
+          ]}>
+          {profileStrings.settings.shareLocation}
+        </Text>
+      </Pressable>
+
       {/* <Pressable
         onPress={() => Alert.alert(profileStrings.settings.logout, profileStrings.settings.logoutUnavailable)}
         style={({pressed}) => [styles.actionRow, pressed && styles.pressed]}
@@ -125,5 +172,7 @@ const styles = StyleSheet.create({
   languageTextSelected: {color: colors.white},
   actionRow: {minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.inputBorder},
   deleteLabel: {flex: 1, color: colors.accent, fontSize: 14, fontWeight: '700'},
+  disabledAction: {opacity: 0.55},
+  disabledActionText: {color: colors.textSecondary},
   pressed: {opacity: 0.75},
 });
