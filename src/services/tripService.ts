@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type TripStop = {
+export type SavedTripStop = {
   id: string;
   place: string;
   city: string;
@@ -10,7 +10,7 @@ export type TripStop = {
 
 const TRIP_STOPS_KEY = 'syunik.trips.stops';
 
-function isTripStop(value: unknown): value is TripStop {
+function isTripStop(value: unknown): value is SavedTripStop {
   if (!value || typeof value !== 'object') {
     return false;
   }
@@ -26,7 +26,7 @@ function isTripStop(value: unknown): value is TripStop {
   );
 }
 
-export async function loadTripStops(): Promise<TripStop[]> {
+export async function loadTripStops(): Promise<SavedTripStop[]> {
   const stored = await AsyncStorage.getItem(TRIP_STOPS_KEY);
   if (!stored) {
     return [];
@@ -36,7 +36,7 @@ export async function loadTripStops(): Promise<TripStop[]> {
   return Array.isArray(parsed) ? parsed.filter(isTripStop) : [];
 }
 
-export async function addTripStop(stop: TripStop): Promise<TripStop[]> {
+export async function addTripStop(stop: SavedTripStop): Promise<SavedTripStop[]> {
   const stops = await loadTripStops();
   const nextStops = [...stops, stop].sort(
     (left, right) =>
@@ -46,7 +46,7 @@ export async function addTripStop(stop: TripStop): Promise<TripStop[]> {
   return nextStops;
 }
 
-export async function deleteTripStop(id: string): Promise<TripStop[]> {
+export async function deleteTripStop(id: string): Promise<SavedTripStop[]> {
   const nextStops = (await loadTripStops()).filter(stop => stop.id !== id);
   await AsyncStorage.setItem(TRIP_STOPS_KEY, JSON.stringify(nextStops));
   return nextStops;

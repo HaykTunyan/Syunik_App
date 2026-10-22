@@ -1,7 +1,8 @@
 //
 
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -9,10 +10,26 @@ import {
   Text,
   View,
 } from 'react-native';
+import {
+  Cloud,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSun,
+  Droplets,
+  RefreshCw,
+  Snowflake,
+  Sun,
+  Umbrella,
+  Wind,
+  WifiOff,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { AttractionsCarousel } from '../components/AttractionsCarousel';
 import {CategoryFilter} from '../components/CategoryFilter';
 import { citiesData } from '../data/citiesData';
 import { historicalPlacesByCity } from '../data/historicalPlaces';
+import {fetchWeatherForecast, type WeatherForecast} from '../services/weatherService';
 
 
 type CityDetailScreenProps = {
@@ -29,9 +46,32 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
 
   const historicalPlaces = historicalPlacesByCity.find(item => item.city === city)?.places ?? [];
 
+  const [weather, setWeather] = useState<WeatherForecast | null>(null);
+  const [weatherStatus, setWeatherStatus] = useState<'loading' | 'success' | 'error'>('loading');
+
   const [selectedCategory, setSelectedCategory] = useState<
     'Overview' | 'Places' | 'Details' | 'Attractions' | 'History'
   >('Overview');
+
+  const loadWeather = useCallback(async () => {
+    if (!cityData) {
+      return;
+    }
+
+    setWeatherStatus('loading');
+
+    try {
+      const forecast = await fetchWeatherForecast(cityData.coords[0], cityData.coords[1]);
+      setWeather(forecast);
+      setWeatherStatus('success');
+    } catch {
+      setWeatherStatus('error');
+    }
+  }, [cityData]);
+
+  useEffect(() => {
+    loadWeather();
+  }, [loadWeather]);
 
   if (!cityData) {
     return (
@@ -56,6 +96,13 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       />
       <Text style={styles.title}>{cityData.latinName}</Text>
       <Text style={styles.description}>{cityData.description}</Text>
+
+      <WeatherCard
+        city={cityData.latinName}
+        forecast={weather}
+        status={weatherStatus}
+        onRetry={loadWeather}
+      />
 
       <CategoryFilter
         categories={['Overview', 'Places', 'Details', 'Attractions', 'History'] as const}
@@ -159,6 +206,146 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
   );
 }
 
+type WeatherCardProps = {
+  city: string;
+  forecast: WeatherForecast | null;
+  status: 'loading' | 'success' | 'error';
+  onRetry: () => void;
+};
+
+function WeatherCard({city, forecast, status, onRetry}: WeatherCardProps) {
+  if (status === 'loading') {
+    return (
+      <View style={styles.weatherCard} accessibilityLabel={`Loading weather for ${city}`}>
+        <ActivityIndicator color="#f8d28c" />
+        <Text style={styles.weatherLoadingText}>Checking the weather in {city}…</Text>
+      </View>
+    );
+  }
+
+  if (status === 'error' || !forecast) {
+    return (
+      <View style={styles.weatherErrorCard}>
+        <WifiOff size={22} color="#b84f3c" accessibilityLabel="Offline" />
+        <View style={styles.weatherErrorContent}>
+          <Text style={styles.weatherErrorTitle}>Weather unavailable</Text>
+          <Text style={styles.weatherErrorText}>Check your connection and try again.</Text>
+        </View>
+        <Pressable
+          accessibilityLabel={`Retry weather for ${city}`}
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={styles.weatherRetryButton}>
+          <RefreshCw size={17} color="#2D4A3E" />
+        </Pressable>
+      </View>
+    );
+  }
+
+  const currentIcon = getWeatherIcon(forecast.current.weatherCode);
+  const CurrentIcon = currentIcon.icon;
+
+  return (
+    <View style={styles.weatherCard} accessibilityLabel={`Current weather in ${city}`}>
+      <View style={styles.weatherHeader}>
+        <View>
+          <Text style={styles.weatherEyebrow}>LIVE WEATHER</Text>
+          <Text style={styles.weatherTitle}>{city} today</Text>
+        </View>
+        <Pressable
+          accessibilityLabel={`Refresh weather for ${city}`}
+          accessibilityRole="button"
+          onPress={onRetry}
+          style={styles.weatherRefreshButton}>
+          <RefreshCw size={17} color="#f8d28c" />
+        </Pressable>
+      </View>
+
+      <View style={styles.currentWeatherRow}>
+        <CurrentIcon size={54} color="#f8d28c" strokeWidth={1.7} />
+        <View style={styles.temperatureBlock}>
+          <Text style={styles.temperature}>{Math.round(forecast.current.temperature)}°</Text>
+          <Text style={styles.conditionText}>{currentIcon.label}</Text>
+        </View>
+        <View style={styles.weatherMetaBlock}>
+          <Text style={styles.weatherMetaText}>Feels {Math.round(forecast.current.feelsLike)}°</Text>
+          <Text style={styles.weatherMetaText}>High {Math.round(forecast.daily[0]?.maxTemperature ?? forecast.current.temperature)}°</Text>
+          <Text style={styles.weatherMetaText}>Low {Math.round(forecast.daily[0]?.minTemperature ?? forecast.current.temperature)}°</Text>
+        </View>
+      </View>
+
+      <View style={styles.weatherStatsRow}>
+        <WeatherStat icon={Droplets} label="Humidity" value={`${Math.round(forecast.current.humidity)}%`} />
+        <WeatherStat icon={Wind} label="Wind" value={`${Math.round(forecast.current.windSpeed)} km/h`} />
+        <WeatherStat icon={Umbrella} label="Rain" value={`${forecast.current.precipitation.toFixed(1)} mm`} />
+      </View>
+
+      <View style={styles.forecastDivider} />
+      <View style={styles.forecastRow}>
+        {forecast.daily.map(day => {
+          const dayIcon = getWeatherIcon(day.weatherCode);
+          const DayIcon = dayIcon.icon;
+
+          return (
+            <View key={day.date} style={styles.forecastDay}>
+              <Text style={styles.forecastDayLabel}>{formatForecastDay(day.date)}</Text>
+              <DayIcon size={20} color="#f8d28c" />
+              <Text style={styles.forecastTemperature}>{Math.round(day.maxTemperature)}°</Text>
+              <Text style={styles.forecastLow}>{Math.round(day.minTemperature)}°</Text>
+            </View>
+          );
+        })}
+      </View>
+      <Text style={styles.weatherSource}>Powered by Open‑Meteo · Updated automatically</Text>
+    </View>
+  );
+}
+
+function WeatherStat({icon: Icon, label, value}: {icon: LucideIcon; label: string; value: string}) {
+  return (
+    <View style={styles.weatherStat}>
+      <Icon size={15} color="#b9d0c2" />
+      <View>
+        <Text style={styles.weatherStatValue}>{value}</Text>
+        <Text style={styles.weatherStatLabel}>{label}</Text>
+      </View>
+    </View>
+  );
+}
+
+function formatForecastDay(date: string): string {
+  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {weekday: 'short'});
+}
+
+function getWeatherIcon(code: number): {icon: LucideIcon; label: string} {
+  if (code === 0) {
+    return {icon: Sun, label: 'Clear sky'};
+  }
+  if (code <= 2) {
+    return {icon: CloudSun, label: 'Partly cloudy'};
+  }
+  if (code === 3) {
+    return {icon: Cloud, label: 'Overcast'};
+  }
+  if (code === 45 || code === 48) {
+    return {icon: CloudFog, label: 'Foggy'};
+  }
+  if (code >= 51 && code <= 67) {
+    return {icon: CloudRain, label: 'Rain showers'};
+  }
+  if (code >= 71 && code <= 77) {
+    return {icon: Snowflake, label: 'Snowy'};
+  }
+  if (code >= 85 && code <= 86) {
+    return {icon: Snowflake, label: 'Snow showers'};
+  }
+  if (code >= 95) {
+    return {icon: CloudLightning, label: 'Thunderstorms'};
+  }
+
+  return {icon: CloudRain, label: 'Mixed conditions'};
+}
+
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
@@ -203,6 +390,54 @@ const styles = StyleSheet.create({
     color: '#4d4d4d',
     marginBottom: 18,
   },
+  weatherCard: {
+    backgroundColor: '#24483d',
+    borderRadius: 22,
+    marginBottom: 18,
+    overflow: 'hidden',
+    padding: 18,
+  },
+  weatherLoadingText: {
+    color: '#e8f0e9',
+    fontSize: 13,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  weatherErrorCard: {
+    alignItems: 'center',
+    backgroundColor: '#fff7f1',
+    borderColor: '#ead8ca',
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: 18,
+    padding: 15,
+  },
+  weatherErrorContent: {flex: 1, marginLeft: 11},
+  weatherErrorTitle: {color: '#2f3e2f', fontSize: 15, fontWeight: '800'},
+  weatherErrorText: {color: '#687362', fontSize: 12, marginTop: 3},
+  weatherRetryButton: {alignItems: 'center', backgroundColor: '#e3efeA', borderRadius: 18, height: 36, justifyContent: 'center', width: 36},
+  weatherHeader: {alignItems: 'flex-start', flexDirection: 'row', justifyContent: 'space-between'},
+  weatherEyebrow: {color: '#b9d0c2', fontSize: 10, fontWeight: '800', letterSpacing: 1.4},
+  weatherTitle: {color: '#fffdf8', fontSize: 18, fontWeight: '800', marginTop: 3},
+  weatherRefreshButton: {alignItems: 'center', backgroundColor: '#31594b', borderRadius: 18, height: 36, justifyContent: 'center', width: 36},
+  currentWeatherRow: {alignItems: 'center', flexDirection: 'row', marginTop: 19},
+  temperatureBlock: {marginLeft: 12},
+  temperature: {color: '#fffdf8', fontSize: 46, fontWeight: '800', letterSpacing: -2},
+  conditionText: {color: '#f8d28c', fontSize: 13, fontWeight: '700', marginTop: -4},
+  weatherMetaBlock: {borderLeftColor: '#416456', borderLeftWidth: 1, marginLeft: 'auto', paddingLeft: 14},
+  weatherMetaText: {color: '#dce8df', fontSize: 12, lineHeight: 20},
+  weatherStatsRow: {borderTopColor: '#416456', borderTopWidth: 1, flexDirection: 'row', justifyContent: 'space-between', marginTop: 17, paddingTop: 14},
+  weatherStat: {alignItems: 'center', flexDirection: 'row', gap: 6},
+  weatherStatValue: {color: '#fffdf8', fontSize: 11, fontWeight: '800'},
+  weatherStatLabel: {color: '#b9d0c2', fontSize: 10, marginTop: 1},
+  forecastDivider: {backgroundColor: '#416456', height: 1, marginTop: 16},
+  forecastRow: {flexDirection: 'row', justifyContent: 'space-between', paddingTop: 14},
+  forecastDay: {alignItems: 'center', gap: 4},
+  forecastDayLabel: {color: '#b9d0c2', fontSize: 10, fontWeight: '700'},
+  forecastTemperature: {color: '#fffdf8', fontSize: 12, fontWeight: '800'},
+  forecastLow: {color: '#9bb8a8', fontSize: 11},
+  weatherSource: {color: '#86a697', fontSize: 9, marginTop: 14, textAlign: 'center'},
   mapCard: {
     backgroundColor: '#eef3e9',
     borderRadius: 18,

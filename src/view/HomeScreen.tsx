@@ -17,7 +17,18 @@ import {SectionHeader} from '../components/SectionHeader';
 type HomeScreenProps = {
   contentContainerStyle?: StyleProp<ViewStyle>;
   onSelectCity: (city: string) => void;
+  onPlanTrip: () => void;
+  onExplore: () => void;
 };
+
+const QUICK_CATEGORIES = [
+  {label: 'Nature', icon: '🏔'},
+  {label: 'History', icon: '🏛'},
+  {label: 'Adventure', icon: '🥾'},
+  {label: 'Food', icon: '🍽'},
+  {label: 'Photography', icon: '📸'},
+  {label: 'Culture', icon: '🏘'},
+];
 
 const POPULAR_ATTRACTIONS = [
   {
@@ -90,12 +101,11 @@ function chunkIntoRows<T>(items: T[], size: number): T[][] {
   return rows;
 }
 
-export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProps) {
+export function HomeScreen({contentContainerStyle, onSelectCity, onPlanTrip, onExplore}: HomeScreenProps) {
   const [query, setQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const searchInputRef = useRef<TextInput>(null);
-  const attractionsOffset = useRef(0);
 
   const filteredCities = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -144,24 +154,65 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
         <View style={styles.heroScrim} />
         <View style={styles.heroContent}>
           <View style={styles.heroBadge}>
-            <Text style={styles.heroBadgeText}>WELCOME TO SYUNIK</Text>
+          <Text style={styles.heroBadgeText}>WELCOME TO SYUNIK</Text>
           </View>
-          <Text style={styles.heroTitle}>Discover the southern soul of Armenia</Text>
+          <Text style={styles.heroTitle}>Discover Syunik</Text>
           <Text style={styles.heroSubtitle}>
-            Breathtaking mountains, ancient monasteries, and warm hospitality await.
+            Your AI-powered local travel companion
           </Text>
           <View style={styles.heroActions}>
             <Pressable
-              onPress={() => scrollToSection(430)}
+              onPress={onPlanTrip}
               style={({pressed}) => [styles.heroCtaPrimary, pressed && styles.ctaPressed]}>
-              <Text style={styles.heroCtaPrimaryText}>Explore cities</Text>
+              <Text style={styles.heroCtaPrimaryText}>Plan my trip</Text>
             </Pressable>
             <Pressable
-              onPress={() => scrollToSection(attractionsOffset.current)}
+              onPress={() => scrollToSection(430)}
               style={({pressed}) => [styles.heroCtaSecondary, pressed && styles.ctaPressed]}>
-              <Text style={styles.heroCtaSecondaryText}>Attractions</Text>
+              <Text style={styles.heroCtaSecondaryText}>Explore cities</Text>
             </Pressable>
           </View>
+        </View>
+      </View>
+
+      <View style={styles.plannerCard}>
+        <View style={styles.plannerGlow} />
+        <View style={styles.plannerHeader}>
+          <View style={styles.plannerIconWrap}>
+            <Text style={styles.plannerIcon}>✨</Text>
+          </View>
+          <View style={styles.plannerHeading}>
+            <Text style={styles.plannerEyebrow}>YOUR NEXT ADVENTURE</Text>
+            <Text style={styles.plannerTitle}>Plan my trip</Text>
+          </View>
+        </View>
+        <Text style={styles.plannerSubtitle}>
+          Tell us what you want to experience and we'll build your route.
+        </Text>
+        <Pressable
+          accessibilityLabel="Plan my trip"
+          accessibilityRole="button"
+          onPress={onPlanTrip}
+          style={({pressed}) => [styles.plannerButton, pressed && styles.ctaPressed]}>
+          <Text style={styles.plannerButtonText}>Plan my trip</Text>
+          <Text style={styles.plannerButtonArrow}>→</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.quickExplore}>
+        <SectionHeader title="Explore by mood" subtitle="Find the Syunik experience that feels like you" />
+        <View style={styles.categoryGrid}>
+          {QUICK_CATEGORIES.map(category => (
+            <Pressable
+              key={category.label}
+              accessibilityLabel={`Explore ${category.label}`}
+              accessibilityRole="button"
+              onPress={onExplore}
+              style={({pressed}) => [styles.categoryChip, pressed && styles.categoryChipPressed]}>
+              <Text style={styles.categoryIcon}>{category.icon}</Text>
+              <Text style={styles.categoryLabel}>{category.label}</Text>
+            </Pressable>
+          ))}
         </View>
       </View>
 
@@ -289,10 +340,7 @@ export function HomeScreen({contentContainerStyle, onSelectCity}: HomeScreenProp
 
       {/* ===== Popular Attractions ===== */}
       <View
-        style={styles.section}
-        onLayout={e => {
-          attractionsOffset.current = e.nativeEvent.layout.y;
-        }}>
+        style={styles.section}>
         <SectionHeader
           title="Popular attractions"
           subtitle="Unmissable sights across Syunik"
@@ -417,6 +465,115 @@ const styles = StyleSheet.create({
   },
   ctaPressed: {
     opacity: 0.7,
+  },
+  plannerCard: {
+    backgroundColor: '#2D4A3E',
+    borderRadius: 22,
+    marginBottom: 22,
+    overflow: 'hidden',
+    padding: 20,
+    position: 'relative',
+  },
+  plannerGlow: {
+    backgroundColor: 'rgba(248, 210, 140, 0.12)',
+    borderRadius: 100,
+    height: 170,
+    position: 'absolute',
+    right: -70,
+    top: -95,
+    width: 170,
+  },
+  plannerHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  plannerIconWrap: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 15,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  plannerIcon: {
+    fontSize: 22,
+  },
+  plannerHeading: {
+    marginLeft: 12,
+  },
+  plannerEyebrow: {
+    color: '#b9d0c2',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.3,
+  },
+  plannerTitle: {
+    color: '#fffdf8',
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  plannerSubtitle: {
+    color: '#e3eee7',
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 15,
+    maxWidth: 290,
+  },
+  plannerButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#f8d28c',
+    borderRadius: 999,
+    flexDirection: 'row',
+    marginTop: 17,
+    minHeight: 44,
+    paddingHorizontal: 17,
+  },
+  plannerButtonText: {
+    color: '#2D4A3E',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  plannerButtonArrow: {
+    color: '#2D4A3E',
+    fontSize: 18,
+    fontWeight: '800',
+    marginLeft: 10,
+  },
+  quickExplore: {
+    marginBottom: 24,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 9,
+    marginTop: 2,
+  },
+  categoryChip: {
+    alignItems: 'center',
+    backgroundColor: '#fffdf8',
+    borderColor: '#e8dccb',
+    borderRadius: 15,
+    borderWidth: 1,
+    flexDirection: 'row',
+    minHeight: 46,
+    paddingHorizontal: 13,
+    width: '31%',
+  },
+  categoryChipPressed: {
+    backgroundColor: '#e3efeA',
+    borderColor: '#b9d0c2',
+  },
+  categoryIcon: {
+    fontSize: 17,
+  },
+  categoryLabel: {
+    color: '#2f3e2f',
+    flexShrink: 1,
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 6,
   },
   searchWrap: {
     marginBottom: 16,

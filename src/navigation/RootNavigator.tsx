@@ -69,6 +69,12 @@ const LazyMyTripsScreen = lazy(() =>
 const LazyCityDetailScreen = lazy(() =>
   import('../view/CityDetailsScreen').then(module => ({default: module.CityDetailScreen})),
 );
+const LazyPlanMyTripScreen = lazy(() =>
+  import('../view/PlanMyTripScreen').then(module => ({default: module.PlanMyTripScreen})),
+);
+const LazyTripItineraryScreen = lazy(() =>
+  import('../view/TripItineraryScreen').then(module => ({default: module.TripItineraryScreen})),
+);
 const LazyVillageDetailScreen = lazy(() =>
   import('../view/VillageDetailScreen').then(module => ({default: module.VillageDetailScreen})),
 );
@@ -149,6 +155,8 @@ function HomeNavigator() {
   return (
     <HomeStack.Navigator screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
       <HomeStack.Screen name="Home" component={HomeRoute} />
+      <HomeStack.Screen name="PlanMyTrip" component={PlanMyTripRoute} />
+      <HomeStack.Screen name="TripItinerary" component={TripItineraryRoute} />
       <HomeStack.Screen name="CityDetail" component={CityDetailRoute} />
     </HomeStack.Navigator>
   );
@@ -203,6 +211,48 @@ function HomeRoute({navigation}: NativeStackScreenProps<HomeStackParamList, 'Hom
         <LazyHomeScreen
           contentContainerStyle={styles.contentContainer}
           onSelectCity={city => navigation.navigate('CityDetail', {city})}
+          onPlanTrip={() => navigation.navigate('PlanMyTrip')}
+          onExplore={() => navigateToAppScreen(navigation, 'tourism')}
+        />
+      </DeferredScreen>
+    </AppShell>
+  );
+}
+
+function PlanMyTripRoute({navigation}: NativeStackScreenProps<HomeStackParamList, 'PlanMyTrip'>) {
+  return (
+    <AppShell
+      activeScreen="home"
+      onNavigate={screen => navigateToAppScreen(navigation, screen)}
+      assistantContext={{
+        page: 'plan-my-trip',
+        title: 'Plan my trip in Syunik',
+        detail: 'Choose time, interests, starting location, and transportation for a mock itinerary.',
+      }}>
+      <DeferredScreen>
+        <LazyPlanMyTripScreen
+          onBack={() => navigation.goBack()}
+          onCreateItinerary={() => navigation.navigate('TripItinerary')}
+        />
+      </DeferredScreen>
+    </AppShell>
+  );
+}
+
+function TripItineraryRoute({navigation}: NativeStackScreenProps<HomeStackParamList, 'TripItinerary'>) {
+  return (
+    <AppShell
+      activeScreen="home"
+      onNavigate={screen => navigateToAppScreen(navigation, screen)}
+      assistantContext={{
+        page: 'trip-itinerary',
+        title: 'Your Syunik adventure',
+        detail: 'A generated mock itinerary with stops, travel times, and trip actions.',
+      }}>
+      <DeferredScreen>
+        <LazyTripItineraryScreen
+          onBack={() => navigation.goBack()}
+          onSaveTrip={() => navigateToAppScreen(navigation, 'myTrips')}
         />
       </DeferredScreen>
     </AppShell>
@@ -276,7 +326,10 @@ function MyTripsRoute({
         detail: 'Planned destinations, visit times, and restaurant stops.',
       }}>
       <DeferredScreen>
-        <LazyMyTripsScreen onBack={() => navigation.goBack()} />
+        <LazyMyTripsScreen
+          onBack={() => navigation.goBack()}
+          onOpenTrip={() => navigateToAppScreen(navigation, 'home', {screen: 'TripItinerary'})}
+        />
       </DeferredScreen>
     </AppShell>
   );

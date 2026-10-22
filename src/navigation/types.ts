@@ -10,6 +10,8 @@ export type MainTabParamList = {
 
 export type HomeStackParamList = {
   Home: undefined;
+  PlanMyTrip: undefined;
+  TripItinerary: undefined;
   CityDetail: {city: string};
 };
 

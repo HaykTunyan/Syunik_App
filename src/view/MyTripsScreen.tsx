@@ -26,23 +26,41 @@ import {
   View,
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors} from '../config/theme';
 import {HeaderBack} from '../components/HeaderBack';
 import {citiesData} from '../data/citiesData';
 import {PlaceSearchInput} from '../features/profile/components/PlaceSearchInput';
+import {useTripPlannerStore} from '../features/trips/store/tripPlannerStore';
+import type {Trip, TripDuration} from '../features/trips/types';
 import {searchPlaces, type Place} from '../features/profile/data/places';
 import {
   addTripStop,
   deleteTripStop,
   loadTripStops,
-  type TripStop,
+  type SavedTripStop,
 } from '../services/tripService';
 
 type PickerMode = 'date' | 'time' | 'filter';
 
 type MyTripsScreenProps = {
   onBack: () => void;
+  onOpenTrip: (tripId: string) => void;
 };
+
+type MockTrip = {
+  id: string;
+  title: string;
+  meta: string;
+};
+
+const MOCK_SAVED_TRIPS: MockTrip[] = [
+  {id: 'saved-weekend-goris', title: 'Weekend in Goris', meta: '2 days · 8 places'},
+];
+
+const MOCK_COMPLETED_TRIPS: MockTrip[] = [
+  {id: 'completed-kapan-exploration', title: 'Kapan Exploration', meta: 'Completed · 6 places'},
+];
 
 function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -82,11 +100,11 @@ function searchTripPlaces(query: string): Place[] {
 }
 
 type TripStopCardProps = {
-  stop: TripStop;
-  onShare: (stop: TripStop) => void;
-  onDelete: (stop: TripStop) => void;
-  onDirections: (stop: TripStop) => void;
-  onRestaurantDirections: (stop: TripStop) => void;
+  stop: SavedTripStop;
+  onShare: (stop: SavedTripStop) => void;
+  onDelete: (stop: SavedTripStop) => void;
+  onDirections: (stop: SavedTripStop) => void;
+  onRestaurantDirections: (stop: SavedTripStop) => void;
 };
 
 const TripStopCard = memo(function TripStopCardView({
@@ -164,8 +182,18 @@ const TripStopCard = memo(function TripStopCardView({
   );
 });
 
-export function MyTripsScreen({onBack}: MyTripsScreenProps) {
-  const [stops, setStops] = useState<TripStop[]>([]);
+export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
+
+  /**
+   * 
+   * MyTripsScreen is a React component that displays a user's saved trips and allows them to manage their trip stops. It includes features for adding, editing, deleting, and sharing trip stops, as well as filtering trips by date. The component uses various hooks for state management and side effects, and it leverages the React Native UI components for rendering the interface.
+   * 
+   */
+
+
+  const trips = useTripPlannerStore(state => state.trips);
+  const insets = useSafeAreaInsets();
+  const [stops, setStops] = useState<SavedTripStop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -260,7 +288,7 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
     }
   }, [isSaving, restaurant, scheduledAt, selectedPlace]);
 
-  const shareStop = useCallback(async (stop: TripStop) => {
+  const shareStop = useCallback(async (stop: SavedTripStop) => {
     const restaurantNote = stop.restaurant
       ? `\nRestaurant: ${stop.restaurant}`
       : '';
@@ -292,7 +320,7 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
     }
   }, [visibleStops]);
 
-  const confirmDeleteStop = useCallback((stop: TripStop) => {
+  const confirmDeleteStop = useCallback((stop: SavedTripStop) => {
     Alert.alert('Remove trip stop?', `Remove ${stop.place} from My Trips?`, [
       {text: 'Cancel', style: 'cancel'},
       {
@@ -307,7 +335,7 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
     ]);
   }, []);
 
-  const openDirections = useCallback(async (stop: TripStop) => {
+  const openDirections = useCallback(async (stop: SavedTripStop) => {
     try {
       await Linking.openURL(getDirectionsUrl(stop.place, stop.city));
     } catch {
@@ -315,7 +343,7 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
     }
   }, []);
 
-  const openRestaurantDirections = useCallback(async (stop: TripStop) => {
+  const openRestaurantDirections = useCallback(async (stop: SavedTripStop) => {
     try {
       await Linking.openURL(getDirectionsUrl(stop.restaurant, stop.city));
     } catch {
@@ -324,7 +352,7 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
   }, []);
 
   const renderStop = useCallback(
-    ({item}: {item: TripStop}) => (
+    ({item}: {item: SavedTripStop}) => (
       <TripStopCard
         stop={item}
         onShare={shareStop}
@@ -341,8 +369,27 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
       <HeaderBack onBack={onBack} />
       <Text style={styles.title}>My Trips</Text>
       <Text style={styles.subtitle}>
-        Plan the places you want to visit and where you want to eat.
+        Your saved routes, ideas, and planned stops in Syunik.
       </Text>
+
+      <TripSection title="Upcoming">
+        {trips.length > 0 ? trips.map(trip => (
+          <SavedTripCard key={trip.id} trip={trip} onOpen={() => onOpenTrip(trip.id)} />
+        )) : (
+          <View style={styles.tripEmptyCard}>
+            <Text style={styles.tripEmptyTitle}>No upcoming trips yet</Text>
+            <Text style={styles.tripEmptyText}>Create an itinerary and save it here.</Text>
+          </View>
+        )}
+      </TripSection>
+
+      <TripSection title="Saved">
+        {MOCK_SAVED_TRIPS.map(trip => <MockTripCard key={trip.id} trip={trip} />)}
+      </TripSection>
+
+      <TripSection title="Completed">
+        {MOCK_COMPLETED_TRIPS.map(trip => <MockTripCard key={trip.id} trip={trip} completed />)}
+      </TripSection>
 
       <View style={styles.filterRow}>
         <Pressable
@@ -498,7 +545,7 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
       renderItem={renderStop}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={
-        !isLoading && !loadError ? (
+        !isLoading && !loadError && trips.length === 0 ? (
           <View style={styles.emptyState}>
             <MapPin size={27} color={colors.textMuted} />
             <Text style={styles.emptyTitle}>
@@ -510,17 +557,89 @@ export function MyTripsScreen({onBack}: MyTripsScreenProps) {
           </View>
         ) : null
       }
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, {paddingBottom: Math.max(40, insets.bottom + 24)}]}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     />
   );
 }
 
+function TripSection({title, children}: {title: string; children: React.ReactNode}) {
+  return (
+    <View style={styles.tripSection}>
+      <Text style={styles.tripSectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+function SavedTripCard({trip, onOpen}: {trip: Trip; onOpen: () => void}) {
+  return (
+    <View style={styles.tripCard}>
+      <View style={styles.tripCardCopy}>
+        <Text style={styles.tripCardTitle}>{trip.title}</Text>
+        <Text style={styles.tripCardMeta}>{formatTripDuration(trip.duration)} · {trip.stops.length} places</Text>
+      </View>
+      <Pressable
+        accessibilityLabel={`Open ${trip.title}`}
+        accessibilityRole="button"
+        onPress={onOpen}
+        style={({pressed}) => [styles.openTripButton, pressed && styles.pressed]}>
+        <Text style={styles.openTripText}>Open trip</Text>
+        <Navigation size={15} color={colors.white} />
+      </Pressable>
+    </View>
+  );
+}
+
+function MockTripCard({trip, completed = false}: {trip: MockTrip; completed?: boolean}) {
+  return (
+    <View style={[styles.tripCard, completed && styles.completedTripCard]}>
+      <View style={[styles.tripStatusIcon, completed && styles.completedStatusIcon]}>
+        {completed ? <CheckMark /> : <MapPin size={18} color={colors.brand} />}
+      </View>
+      <View style={styles.tripCardCopy}>
+        <Text style={styles.tripCardTitle}>{trip.title}</Text>
+        <Text style={styles.tripCardMeta}>{trip.meta}</Text>
+      </View>
+    </View>
+  );
+}
+
+function CheckMark() {
+  return <Text style={styles.checkMark}>✓</Text>;
+}
+
+function formatTripDuration(duration: TripDuration): string {
+  const labels: Record<TripDuration, string> = {
+    '2_hours': '2 hours',
+    half_day: 'Half day',
+    '1_day': '1 day',
+    '2_3_days': '2–3 days',
+    '1_week': '1 week',
+  };
+  return labels[duration];
+}
+
 const styles = StyleSheet.create({
   content: {flexGrow: 1, padding: 20, paddingBottom: 40, backgroundColor: colors.background},
   title: {color: colors.text, fontSize: 28, fontWeight: '800'},
   subtitle: {color: colors.textSecondary, fontSize: 14, lineHeight: 21, marginTop: 6},
+  tripSection: {marginTop: 22},
+  tripSectionTitle: {color: colors.text, fontSize: 18, fontWeight: '800', marginBottom: 10},
+  tripCard: {alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 15, borderWidth: 1, flexDirection: 'row', gap: 11, marginBottom: 9, padding: 13},
+  completedTripCard: {backgroundColor: colors.surfaceAlt},
+  tripCardCopy: {flex: 1},
+  tripCardTitle: {color: colors.text, fontSize: 15, fontWeight: '800'},
+  tripCardMeta: {color: colors.textSecondary, fontSize: 12, marginTop: 4},
+  tripStatusIcon: {alignItems: 'center', backgroundColor: colors.brandSoft, borderRadius: 11, height: 38, justifyContent: 'center', width: 38},
+  completedStatusIcon: {backgroundColor: '#e9eee5'},
+  checkMark: {color: colors.brand, fontSize: 19, fontWeight: '800'},
+  openTripButton: {alignItems: 'center', backgroundColor: colors.brand, borderRadius: 9, flexDirection: 'row', gap: 5, minHeight: 36, paddingHorizontal: 10},
+  openTripText: {color: colors.white, fontSize: 11, fontWeight: '800'},
+  tripEmptyCard: {backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 15, borderWidth: 1, padding: 14},
+  tripEmptyTitle: {color: colors.text, fontSize: 14, fontWeight: '800'},
+  tripEmptyText: {color: colors.textSecondary, fontSize: 12, marginTop: 4},
   filterRow: {alignItems: 'center', flexDirection: 'row', gap: 12, marginTop: 20},
   filterButton: {alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 10, borderWidth: 1, flexDirection: 'row', gap: 8, minHeight: 42, paddingHorizontal: 12},
   filterText: {color: colors.text, fontSize: 13, fontWeight: '600'},
