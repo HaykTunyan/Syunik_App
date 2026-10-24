@@ -1,5 +1,6 @@
 import {create} from 'zustand';
 import type {TransportType, Trip, TripDuration, TripInterest, TripStop} from '../types';
+import {getPlaceById} from '../../../data/places';
 
 export type TripPace = 'Relaxed' | 'Balanced' | 'Full days';
 export type TripStartingLocation = 'Use my current location' | 'Kapan' | 'Goris' | 'Tatev' | 'Meghri' | 'Sisian';
@@ -17,13 +18,9 @@ export type TripPreferences = {
 
 export type ItineraryItem = {
   id: string;
+  placeId: string;
   day: number;
   time: string;
-  title: string;
-  city: string;
-  description: string;
-  category: TripInterest;
-  durationMinutes: number;
   travelTimeMinutes?: number;
 };
 
@@ -45,6 +42,7 @@ export interface TripState {
   createTrip: (trip: Trip) => void;
   saveTrip: (trip: Trip) => void;
   setCurrentTrip: (trip: Trip) => void;
+  addPlaceToCurrentTrip: (placeId: string) => boolean;
   removeTrip: (tripId: string) => void;
   saveGeneratedTrip: () => Trip;
 }
@@ -52,89 +50,57 @@ export interface TripState {
 const MOCK_ITINERARY: ItineraryItem[] = [
   {
     id: 'day-1-vahanavank',
+    placeId: 'vahanavank',
     day: 1,
     time: '09:30',
-    title: 'Vahanavank Monastery',
-    city: 'Kapan',
-    description: 'Start among forested hills and discover one of Syunik’s quiet spiritual landmarks.',
-    category: 'history',
-    durationMinutes: 45,
   },
   {
     id: 'day-1-khustup',
+    placeId: 'khustup-mountain',
     day: 1,
     time: '15:00',
-    title: 'Khustup Mountain viewpoint',
-    city: 'Kapan',
-    description: 'Take in wide mountain views before a relaxed evening in Kapan.',
-    category: 'nature',
-    durationMinutes: 45,
     travelTimeMinutes: 25,
   },
   {
     id: 'day-2-tatev',
+    placeId: 'tatev-monastery',
     day: 2,
     time: '09:00',
-    title: 'Tatev Monastery',
-    city: 'Goris',
-    description: 'Spend the morning at Syunik’s iconic monastery and its dramatic gorge.',
-    category: 'history',
-    durationMinutes: 90,
     travelTimeMinutes: 30,
   },
   {
     id: 'day-2-khndzoresk',
+    placeId: 'khndzoresk',
     day: 2,
     time: '14:30',
-    title: 'Khndzoresk caves and bridge',
-    city: 'Goris',
-    description: 'Walk through the old cave settlement and cross the swinging bridge.',
-    category: 'nature',
-    durationMinutes: 60,
     travelTimeMinutes: 35,
   },
   {
     id: 'day-3-karahunj',
+    placeId: 'zorats-karer',
     day: 3,
     time: '10:00',
-    title: 'Zorats Karer (Karahunj)',
-    city: 'Sisian',
-    description: 'Explore the ancient stone observatory and the stories around its origins.',
-    category: 'history',
-    durationMinutes: 75,
     travelTimeMinutes: 30,
   },
   {
     id: 'day-3-shaki',
+    placeId: 'shaki-waterfall',
     day: 3,
     time: '15:30',
-    title: 'Shaki Waterfall',
-    city: 'Sisian',
-    description: 'Slow down beside the waterfall and enjoy a peaceful afternoon outdoors.',
-    category: 'nature',
-    durationMinutes: 60,
     travelTimeMinutes: 20,
   },
   {
     id: 'day-4-meghri',
+    placeId: 'meghri-old-town',
     day: 4,
     time: '10:30',
-    title: 'Meghri old town',
-    city: 'Meghri',
-    description: 'Wander through warm-colored streets and taste the flavors of southern Syunik.',
-    category: 'food',
-    durationMinutes: 75,
     travelTimeMinutes: 40,
   },
   {
     id: 'day-5-qajaran',
+    placeId: 'qajaran-historic-district',
     day: 5,
     time: '11:00',
-    title: 'Qajaran and Lichk',
-    city: 'Qajaran',
-    description: 'Finish with highland scenery, local stories, and a gentle mountain walk.',
-    category: 'culture',
-    durationMinutes: 90,
     travelTimeMinutes: 35,
   },
 ];
@@ -152,13 +118,11 @@ const initialPreferences: TripPreferences = {
 function buildGeneratedTrip(preferences: TripPreferences, itinerary: ItineraryItem[]): Trip {
   const stops: TripStop[] = itinerary.map((item, index) => ({
     id: item.id,
-    placeId: item.city.toLowerCase(),
-    title: item.title,
-    description: item.description,
-    startTime: item.time,
-    durationMinutes: item.durationMinutes,
-    travelTimeMinutes: item.travelTimeMinutes,
+    placeId: item.placeId,
     order: index + 1,
+    startTime: item.time,
+    duration: getPlaceById(item.placeId)?.recommendedDuration ?? 60,
+    travelTimeFromPrevious: item.travelTimeMinutes,
   }));
 
   return {
@@ -170,7 +134,7 @@ function buildGeneratedTrip(preferences: TripPreferences, itinerary: ItineraryIt
     startLocation: preferences.startingLocation,
     totalDistanceKm: itinerary.length * 18,
     totalDurationMinutes: stops.reduce(
-      (total, stop) => total + stop.durationMinutes + (stop.travelTimeMinutes ?? 0),
+      (total, stop) => total + stop.duration + (stop.travelTimeFromPrevious ?? 0),
       0,
     ),
     stops,
@@ -187,10 +151,10 @@ export const useTripPlannerStore = create<TripState>((set, get) => ({
     set(state => {
       const selectedPreferences = nextPreferences ?? state.preferences;
       const preferred = MOCK_ITINERARY.filter(item =>
-        selectedPreferences.interests.includes(item.category),
+        selectedPreferences.interests.includes(getPlaceById(item.placeId)?.category ?? 'culture'),
       );
       const remaining = MOCK_ITINERARY.filter(
-        item => !selectedPreferences.interests.includes(item.category),
+        item => !selectedPreferences.interests.includes(getPlaceById(item.placeId)?.category ?? 'culture'),
       );
       const itinerary = [...preferred, ...remaining]
         .sort((left, right) => left.day - right.day || left.time.localeCompare(right.time))
@@ -205,6 +169,47 @@ export const useTripPlannerStore = create<TripState>((set, get) => ({
       currentTrip: trip,
     })),
   setCurrentTrip: trip => set({currentTrip: trip}),
+  addPlaceToCurrentTrip: placeId => {
+    const place = getPlaceById(placeId);
+    if (!place) {
+      return false;
+    }
+
+    const state = get();
+    const targetTrip = state.currentTrip ?? state.trips[0];
+    const trip = targetTrip ?? {
+      id: `trip-${Date.now()}`,
+      title: 'Your Syunik Adventure',
+      duration: state.preferences.duration,
+      interests: state.preferences.interests,
+      transport: state.preferences.transportation,
+      startLocation: state.preferences.startingLocation,
+      stops: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    if (trip.stops.some(stop => stop.placeId === placeId)) {
+      return false;
+    }
+
+    const nextStop: TripStop = {
+      id: `${trip.id}-${placeId}`,
+      placeId,
+      order: trip.stops.length + 1,
+      duration: place.recommendedDuration,
+    };
+    const nextTrip: Trip = {
+      ...trip,
+      stops: [...trip.stops, nextStop],
+      totalDurationMinutes: (trip.totalDurationMinutes ?? 0) + nextStop.duration,
+    };
+
+    set(current => ({
+      currentTrip: nextTrip,
+      trips: [...current.trips.filter(item => item.id !== nextTrip.id), nextTrip],
+    }));
+    return true;
+  },
   removeTrip: tripId =>
     set(state => ({
       trips: state.trips.filter(trip => trip.id !== tripId),

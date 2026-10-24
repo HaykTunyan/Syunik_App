@@ -1,29 +1,35 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getPlaceById, getPlaceByName} from '../data/places';
 
 export type SavedTripStop = {
   id: string;
-  place: string;
-  city: string;
+  placeId: string;
   scheduledAt: string;
   restaurant: string;
 };
 
 const TRIP_STOPS_KEY = 'syunik.trips.stops';
 
-function isTripStop(value: unknown): value is SavedTripStop {
+function parseTripStop(value: unknown): SavedTripStop | undefined {
   if (!value || typeof value !== 'object') {
-    return false;
+    return undefined;
   }
 
   const stop = value as Record<string, unknown>;
-  return (
-    typeof stop.id === 'string' &&
-    typeof stop.place === 'string' &&
-    typeof stop.city === 'string' &&
-    typeof stop.scheduledAt === 'string' &&
-    Number.isFinite(Date.parse(stop.scheduledAt)) &&
-    typeof stop.restaurant === 'string'
-  );
+  if (typeof stop.id !== 'string' || typeof stop.scheduledAt !== 'string' || !Number.isFinite(Date.parse(stop.scheduledAt)) || typeof stop.restaurant !== 'string') {
+    return undefined;
+  }
+
+  if (typeof stop.placeId === 'string' && getPlaceById(stop.placeId)) {
+    return {id: stop.id, placeId: stop.placeId, scheduledAt: stop.scheduledAt, restaurant: stop.restaurant};
+  }
+
+  if (typeof stop.place === 'string') {
+    const place = getPlaceByName(stop.place);
+    return place ? {id: stop.id, placeId: place.id, scheduledAt: stop.scheduledAt, restaurant: stop.restaurant} : undefined;
+  }
+
+  return undefined;
 }
 
 export async function loadTripStops(): Promise<SavedTripStop[]> {
@@ -33,7 +39,9 @@ export async function loadTripStops(): Promise<SavedTripStop[]> {
   }
 
   const parsed: unknown = JSON.parse(stored);
-  return Array.isArray(parsed) ? parsed.filter(isTripStop) : [];
+  return Array.isArray(parsed)
+    ? parsed.map(parseTripStop).filter((stop): stop is SavedTripStop => Boolean(stop))
+    : [];
 }
 
 export async function addTripStop(stop: SavedTripStop): Promise<SavedTripStop[]> {

@@ -16,6 +16,11 @@ import {
 import { HeaderBack } from '../components/HeaderBack';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { loadFavorites, toggleFavorite } from '../features/profile/services/profileStorage';
+import {places, type Place, type PlaceCategory as SharedPlaceCategory} from '../data/places';
+import {getPlaceById} from '../data/places';
+import {openPlaceInMaps} from '../features/places/mapLinks';
+import {useTripPlannerStore} from '../features/trips/store/tripPlannerStore';
+import {calculateDistance} from '../utils/geo';
 
 import {
     Binoculars,
@@ -36,6 +41,7 @@ import {
     type LucideIcon,
 } from 'lucide-react-native';
 import MapView, {
+    Polyline,
     UrlTile,
     Marker,
     type Region,
@@ -44,6 +50,7 @@ import MapView, {
 
 type RoadScreenProps = {
     onBack: () => void;
+  onViewPlace: (placeId: string) => void;
 };
 
 type RoadRoute = {
@@ -76,8 +83,10 @@ type MapPlace = {
     category: PlaceCategory;
     latitude: number;
     longitude: number;
+    cityName: string;
     image?: ImageSourcePropType;
     contact?: string;
+    isTripStop?: boolean;
 };
 
 const categoryStyles: Record<PlaceCategory, {color: string; Icon: LucideIcon}> = {
@@ -90,29 +99,35 @@ const categoryStyles: Record<PlaceCategory, {color: string; Icon: LucideIcon}> =
     Viewpoints: {color: '#74619b', Icon: Binoculars},
 };
 
-const mapPlaces: MapPlace[] = [
-    {id: 'tatev-monastery', name: 'Tatev Monastery', description: 'A medieval monastery overlooking the Vorotan Gorge.', category: 'Historical Places', latitude: 39.3794, longitude: 46.2501, image: require('../assets/images/for-travel/tatev.png')},
-    {id: 'zorats-karer', name: 'Zorats Karer', description: 'An ancient stone monument near Sisian.', category: 'Historical Places', latitude: 39.5506, longitude: 46.0283, image: require('../assets/images/for-travel/karahunj.png')},
-    {id: 'khndzoresk-old-village', name: 'Old Khndzoresk', description: 'Historic cave dwellings in the Khndzoresk gorge.', category: 'Historical Places', latitude: 39.5044, longitude: 46.4352, image: require('../assets/images/for-travel/khndzoresk.png')},
-    {id: 'wings-of-tatev', name: 'Wings of Tatev', description: 'The cableway connecting Halidzor and Tatev.', category: 'Attractions', latitude: 39.4042, longitude: 46.2866, image: require('../assets/images/for-travel/halidzor.png')},
-    {id: 'devils-bridge', name: 'Devil’s Bridge', description: 'A natural travertine bridge in the Vorotan Gorge.', category: 'Attractions', latitude: 39.3215, longitude: 46.2675, image: require('../assets/images/for-travel/devils_bridge.png')},
-    {id: 'khndzoresk-bridge', name: 'Khndzoresk Swinging Bridge', description: 'A suspension bridge across the old village gorge.', category: 'Attractions', latitude: 39.5042, longitude: 46.4358, image: require('../assets/images/goris/goris_khndzoresk_bridge_ai.png')},
-    {id: 'goris-restaurant', name: 'Goris dining', description: 'Restaurants and cafes in central Goris.', category: 'Restaurants', latitude: 39.5111, longitude: 46.3417},
-    {id: 'kapan-restaurant', name: 'Kapan dining', description: 'Restaurants and cafes in central Kapan.', category: 'Restaurants', latitude: 39.2075, longitude: 46.4058},
-    {id: 'sisian-restaurant', name: 'Sisian dining', description: 'Restaurants and cafes in central Sisian.', category: 'Restaurants', latitude: 39.5203, longitude: 46.0285},
-    {id: 'goris-hotels', name: 'Goris stays', description: 'Hotels and guesthouses in Goris.', category: 'Hotels', latitude: 39.5067, longitude: 46.3375},
-    {id: 'tatev-guesthouses', name: 'Tatev stays', description: 'Guesthouses in Tatev village.', category: 'Hotels', latitude: 39.3854, longitude: 46.2445},
-    {id: 'meghri-hotels', name: 'Meghri stays', description: 'Hotels and guesthouses in Meghri.', category: 'Hotels', latitude: 38.9022, longitude: 46.2444},
-    {id: 'shaki-waterfall', name: 'Shaki Waterfall', description: 'A waterfall near Sisian, surrounded by basalt cliffs.', category: 'Nature', latitude: 39.5522, longitude: 45.9933, image: require('../assets/images/sisian/shaki-waterfall-sisian.png')},
-    {id: 'vorotan-gorge', name: 'Vorotan Gorge', description: 'A dramatic river gorge near Tatev.', category: 'Nature', latitude: 39.3545, longitude: 46.2672},
-    {id: 'khustup', name: 'Mount Khustup', description: 'A prominent peak south of Kapan.', category: 'Nature', latitude: 39.1458, longitude: 46.3447, image: require('../assets/images/for-travel/khustup.png')},
-    {id: 'tatev-trail', name: 'Tatev canyon trail', description: 'A hiking route through the Vorotan canyon landscape.', category: 'Hiking', latitude: 39.3668, longitude: 46.2578},
-    {id: 'khustup-trail', name: 'Khustup trailhead', description: 'A starting point for hikes on Mount Khustup.', category: 'Hiking', latitude: 39.1758, longitude: 46.3735},
-    {id: 'old-goris-trail', name: 'Old Goris trail', description: 'A walking trail among Goris’s distinctive rock formations.', category: 'Hiking', latitude: 39.5053, longitude: 46.3521},
-    {id: 'tatev-viewpoint', name: 'Tatev Gorge viewpoint', description: 'Panoramic views across the Vorotan Gorge.', category: 'Viewpoints', latitude: 39.3818, longitude: 46.2385},
-    {id: 'goris-viewpoint', name: 'Goris panorama', description: 'A viewpoint over Goris and its surrounding cliffs.', category: 'Viewpoints', latitude: 39.5212, longitude: 46.3508},
-    {id: 'khustup-viewpoint', name: 'Khustup viewpoint', description: 'Mountain views from the Kapan highlands.', category: 'Viewpoints', latitude: 39.1568, longitude: 46.3672},
-];
+const mapPlaces: MapPlace[] = places
+    .map(place => toMapPlace(place))
+    .filter((place): place is MapPlace => Boolean(place));
+
+function toMapPlace(place: Place, isTripStop = false): MapPlace | null {
+    if (!place.coordinates) {
+        return null;
+    }
+
+    return {
+        id: place.id,
+        name: place.name,
+        description: place.description,
+        category: toMapCategory(place.category),
+        latitude: place.coordinates.latitude,
+        longitude: place.coordinates.longitude,
+        cityName: place.cityName,
+        image: place.image,
+        isTripStop,
+    };
+}
+
+function toMapCategory(category: SharedPlaceCategory): PlaceCategory {
+    if (category === 'history') return 'Historical Places';
+    if (category === 'nature' || category === 'relaxation') return 'Nature';
+    if (category === 'adventure') return 'Hiking';
+    if (category === 'photography') return 'Viewpoints';
+    return 'Attractions';
+}
 
 const routes: RoadRoute[] = [
     {
@@ -144,7 +159,7 @@ const routes: RoadRoute[] = [
     },
 ];
 
-export function RoadScreen({ onBack }: RoadScreenProps) {
+export function RoadScreen({ onBack, onViewPlace }: RoadScreenProps) {
 
     /**
      * RoadScreen is a React component that displays a map of Syunik with various points of interest, categorized by type. It allows users to filter places by category, view details about selected places, and see their own location on the map. The component uses React Native Maps for rendering the map and markers, and it manages state for selected categories, places, and user location. It also handles permissions for accessing the user's location and provides functionality to open directions in Google Maps.
@@ -152,12 +167,14 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
      */
 
     const mapRef = useRef<MapView>(null);
+    const currentTrip = useTripPlannerStore(state => state.currentTrip);
     const [selectedCategory, setSelectedCategory] = useState<(typeof placeCategories)[number]>('All');
     const [selectedPlace, setSelectedPlace] = useState<MapPlace | null>(null);
     const [showPlaceDetails, setShowPlaceDetails] = useState(false);
     const [isMapFullscreen, setIsMapFullscreen] = useState(false);
     const [favorites, setFavorites] = useState<string[]>([]);
     const [userLocation, setUserLocation] = useState<{latitude: number; longitude: number} | null>(null);
+    const [locationUnavailable, setLocationUnavailable] = useState(false);
     const [showUserLocation, setShowUserLocation] = useState(false);
     const [centerWhenLocationArrives, setCenterWhenLocationArrives] = useState(false);
     const locationErrorShown = useRef(false);
@@ -168,10 +185,22 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
         longitudeDelta: 0.5,
     });
 
-    const visiblePlaces = useMemo(
-        () => mapPlaces.filter(place => selectedCategory === 'All' || place.category === selectedCategory),
-        [selectedCategory],
-    );
+    const activeTripPlaces = useMemo(() => {
+        const tripStopPlaces = currentTrip?.stops
+            .map(stop => getPlaceById(stop.placeId))
+            .filter((place): place is Place => Boolean(place))
+            .map(place => toMapPlace(place, true))
+            .filter((place): place is MapPlace => Boolean(place)) ?? [];
+
+        return tripStopPlaces;
+    }, [currentTrip]);
+
+    const visiblePlaces = useMemo(() => {
+        const filteredPlaces = mapPlaces.filter(place => selectedCategory === 'All' || place.category === selectedCategory);
+        const visibleIds = new Set(filteredPlaces.map(place => place.id));
+        const tripPlacesNotInFilter = activeTripPlaces.filter(place => !visibleIds.has(place.id));
+        return [...filteredPlaces, ...tripPlacesNotInFilter];
+    }, [activeTripPlaces, selectedCategory]);
 
     useEffect(() => {
         let isActive = true;
@@ -210,10 +239,10 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
             groups.set(key, group);
         });
 
-        const groupedMarkers = Array.from(groups.values(), places => ({
-            places,
-            latitude: places.reduce((total, place) => total + place.latitude, 0) / places.length,
-            longitude: places.reduce((total, place) => total + place.longitude, 0) / places.length,
+        const groupedMarkers = Array.from(groups.values(), groupPlaces => ({
+            places: groupPlaces,
+            latitude: groupPlaces.reduce((total, place) => total + place.latitude, 0) / groupPlaces.length,
+            longitude: groupPlaces.reduce((total, place) => total + place.longitude, 0) / groupPlaces.length,
         }));
 
         if (selectedPlace && visiblePlaces.some(place => place.id === selectedPlace.id)) {
@@ -260,6 +289,7 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                 longitude: coordinate.longitude,
             };
             setUserLocation(location);
+            setLocationUnavailable(false);
             if (centerWhenLocationArrives) {
                 mapRef.current?.animateToRegion({
                     ...location,
@@ -280,9 +310,10 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
     };
 
     const showLocationPermissionHelp = (canOpenSettings: boolean) => {
+        setLocationUnavailable(true);
         Alert.alert(
             'Location access needed',
-            'Allow location access in your phone settings to show your position on the map.',
+            'Location access is unavailable.\n\nYou can still explore Syunik manually.',
             canOpenSettings
                 ? [
                     {text: 'Cancel', style: 'cancel'},
@@ -315,7 +346,8 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                     return;
                 }
             } catch {
-                Alert.alert('Location', 'Could not request location access. Please try again.');
+                setLocationUnavailable(true);
+                Alert.alert('Location', 'Location access is unavailable.\n\nYou can still explore Syunik manually.');
                 return;
             }
         }
@@ -332,24 +364,16 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
         if (!selectedPlace || !userLocation) {
             return null;
         }
-        const radians = (degrees: number) => (degrees * Math.PI) / 180;
-        const latitudeDelta = radians(selectedPlace.latitude - userLocation.latitude);
-        const longitudeDelta = radians(selectedPlace.longitude - userLocation.longitude);
-        const haversine = Math.min(
-            1,
-            Math.max(
-                0,
-                Math.sin(latitudeDelta / 2) ** 2 +
-                    Math.cos(radians(userLocation.latitude)) *
-                        Math.cos(radians(selectedPlace.latitude)) *
-                        Math.sin(longitudeDelta / 2) ** 2,
-            ),
+        const distanceInKilometers = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            selectedPlace.latitude,
+            selectedPlace.longitude,
         );
-        const distanceInMeters = 6371000 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 
-        return distanceInMeters < 1000
-            ? `${Math.round(distanceInMeters)} m away`
-            : `${(distanceInMeters / 1000).toFixed(1)} km away`;
+        return distanceInKilometers < 1
+            ? `${Math.round(distanceInKilometers * 1000)} m away`
+            : `${distanceInKilometers.toFixed(1)} km away`;
     }, [selectedPlace, userLocation]);
 
     const handleToggleFavorite = async (place: MapPlace) => {
@@ -366,10 +390,12 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
     };
 
     const openDirections = async (place: MapPlace) => {
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`;
-        try {
-            await Linking.openURL(url);
-        } catch {
+        const opened = await openPlaceInMaps({
+            latitude: place.latitude,
+            longitude: place.longitude,
+            label: place.name,
+        });
+        if (!opened) {
             Alert.alert('Directions', 'Could not open directions for this place.');
         }
     };
@@ -404,6 +430,7 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                 <View style={[
                     styles.placeMarker,
                     {backgroundColor: color},
+                    place.isTripStop && styles.tripStopMarker,
                     selectedPlace?.id === place.id && styles.selectedPlaceMarker,
                 ]}>
                     <Icon color="#fffdf8" size={18} strokeWidth={2.4} />
@@ -425,6 +452,15 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                 maximumZ={19}
                 flipY={false}
             />
+            {activeTripPlaces.length > 1 && (
+                <Polyline
+                    coordinates={activeTripPlaces.map(place => ({latitude: place.latitude, longitude: place.longitude}))}
+                    strokeColor="#b84f3c"
+                    strokeWidth={4}
+                    lineCap="round"
+                    lineJoin="round"
+                />
+            )}
             {renderMarkers()}
         </MapView>
     );
@@ -481,11 +517,11 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                 )}
                 <View style={styles.placeActions}>
                     <Pressable
-                        onPress={() => setShowPlaceDetails(true)}
+                        onPress={() => onViewPlace(selectedPlace.id)}
                         style={[styles.placeAction, styles.detailsAction]}
                         accessibilityRole="button"
-                        accessibilityLabel="View full details">
-                        <Text style={styles.detailsActionText}>Full details</Text>
+                        accessibilityLabel="View place">
+                        <Text style={styles.detailsActionText}>View Place</Text>
                         <ChevronRight size={16} color="#fffdf8" />
                     </Pressable>
                     <Pressable
@@ -534,6 +570,12 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                 <Text style={styles.intro}>
                     Follow the mountain roads between Syunik’s cities, villages, monasteries, and viewpoints.
                 </Text>
+                {locationUnavailable && (
+                    <View style={styles.locationUnavailable}>
+                        <Text style={styles.locationUnavailableTitle}>Location access is unavailable.</Text>
+                        <Text style={styles.locationUnavailableText}>You can still explore Syunik manually.</Text>
+                    </View>
+                )}
 
                 {/* <View style={styles.mapCard}>
           <View style={styles.mapHeader}>
@@ -606,7 +648,7 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                 {selectedPlace && (
                     <View style={styles.placeCard}>
                         <View style={styles.placeCardHeading}>
-                            <Text style={styles.placeCardEyebrow}>SELECTED PLACE</Text>
+                            <Text style={styles.placeCardEyebrow}>{selectedPlace.isTripStop ? 'ACTIVE TRIP STOP' : 'SELECTED PLACE'}</Text>
                             <Pressable
                                 onPress={() => {
                                     setSelectedPlace(null);
@@ -632,7 +674,7 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                             )}
                             <View style={styles.placeSummaryText}>
                                 <Text style={styles.placeName}>{selectedPlace.name}</Text>
-                                <Text style={styles.placeCategory}>{selectedPlace.category}</Text>
+                                <Text style={styles.placeCategory}>{selectedPlace.cityName} · {selectedPlace.category}</Text>
                                 <Text style={styles.placeDescription} numberOfLines={2}>{selectedPlace.description}</Text>
                             </View>
                         </View>
@@ -650,11 +692,11 @@ export function RoadScreen({ onBack }: RoadScreenProps) {
                         )}
                         <View style={styles.placeActions}>
                             <Pressable
-                                onPress={() => setShowPlaceDetails(true)}
+                                onPress={() => onViewPlace(selectedPlace.id)}
                                 style={[styles.placeAction, styles.detailsAction]}
                                 accessibilityRole="button"
                                 accessibilityLabel="View full details">
-                                <Text style={styles.detailsActionText}>Full details</Text>
+                                <Text style={styles.detailsActionText}>View Place</Text>
                                 <ChevronRight size={16} color="#fffdf8" />
                             </Pressable>
                             <Pressable
@@ -820,6 +862,9 @@ const styles = StyleSheet.create({
     eyebrow: { color: '#738767', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginTop: 5, marginBottom: 5 },
     title: { color: '#2f3e2f', fontSize: 30, fontWeight: '800', marginBottom: 8 },
     intro: { color: '#586254', fontSize: 15, lineHeight: 22, marginBottom: 18 },
+    locationUnavailable: {backgroundColor: '#f7eadf', borderColor: '#e6cdbd', borderRadius: 14, borderWidth: 1, marginBottom: 16, padding: 14},
+    locationUnavailableTitle: {color: '#8f493d', fontSize: 14, fontWeight: '800'},
+    locationUnavailableText: {color: '#667064', fontSize: 13, marginTop: 4},
     mapContainer: { paddingHorizontal: 16, marginTop: 12, marginBottom: 16 },
     openMapButton: {
         minHeight: 44,
@@ -909,6 +954,10 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.25,
         shadowRadius: 3,
+    },
+    tripStopMarker: {
+        borderColor: '#f6cf75',
+        borderWidth: 4,
     },
     clusterMarker: {
         minWidth: 38,

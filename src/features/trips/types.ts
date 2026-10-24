@@ -19,12 +19,11 @@ export type TransportType = 'car' | 'taxi' | 'public_transport' | 'walking';
 export interface TripStop {
   id: string;
   placeId: string;
-  title: string;
-  description?: string;
-  startTime: string;
-  durationMinutes: number;
-  travelTimeMinutes?: number;
   order: number;
+  startTime?: string;
+  duration: number;
+  travelTimeFromPrevious?: number;
+  distanceFromPrevious?: number;
 }
 
 export interface Trip {

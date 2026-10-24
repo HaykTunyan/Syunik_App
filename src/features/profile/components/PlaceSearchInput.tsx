@@ -71,11 +71,11 @@ export function PlaceSearchInput({
                   onPress={() => onSelect(place)}
                   style={({pressed}) => [styles.suggestion, pressed && styles.pressed]}
                   accessibilityRole="button"
-                  accessibilityLabel={`Select ${place.name}, ${place.city}`}>
+                  accessibilityLabel={`Select ${place.name}, ${place.cityName}`}>
                   <MapPin size={16} color={colors.textMuted} />
                   <View style={styles.placeText}>
                     <Text style={styles.placeName}>{place.name}</Text>
-                    <Text style={styles.placeCity}>{place.city}</Text>
+                    <Text style={styles.placeCity}>{place.cityName}</Text>
                   </View>
                 </Pressable>
               ))}

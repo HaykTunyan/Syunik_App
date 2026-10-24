@@ -75,6 +75,9 @@ const LazyPlanMyTripScreen = lazy(() =>
 const LazyTripItineraryScreen = lazy(() =>
   import('../view/TripItineraryScreen').then(module => ({default: module.TripItineraryScreen})),
 );
+const LazyPlaceDetailsScreen = lazy(() =>
+  import('../view/PlaceDetailsScreen').then(module => ({default: module.PlaceDetailsScreen})),
+);
 const LazyVillageDetailScreen = lazy(() =>
   import('../view/VillageDetailScreen').then(module => ({default: module.VillageDetailScreen})),
 );
@@ -158,6 +161,7 @@ function HomeNavigator() {
       <HomeStack.Screen name="PlanMyTrip" component={PlanMyTripRoute} />
       <HomeStack.Screen name="TripItinerary" component={TripItineraryRoute} />
       <HomeStack.Screen name="CityDetail" component={CityDetailRoute} />
+      <HomeStack.Screen name="PlaceDetail" component={PlaceDetailRoute} />
     </HomeStack.Navigator>
   );
 }
@@ -167,6 +171,7 @@ function ExploreNavigator() {
     <ExploreStack.Navigator screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
       <ExploreStack.Screen name="Explore" component={ExploreRoute} />
       <ExploreStack.Screen name="VillageDetail" component={VillageDetailRoute} />
+      <ExploreStack.Screen name="PlaceDetail" component={ExplorePlaceDetailRoute} />
     </ExploreStack.Navigator>
   );
 }
@@ -211,6 +216,7 @@ function HomeRoute({navigation}: NativeStackScreenProps<HomeStackParamList, 'Hom
         <LazyHomeScreen
           contentContainerStyle={styles.contentContainer}
           onSelectCity={city => navigation.navigate('CityDetail', {city})}
+          onSelectPlace={placeId => navigation.navigate('PlaceDetail', {placeId})}
           onPlanTrip={() => navigation.navigate('PlanMyTrip')}
           onExplore={() => navigateToAppScreen(navigation, 'tourism')}
         />
@@ -253,6 +259,7 @@ function TripItineraryRoute({navigation}: NativeStackScreenProps<HomeStackParamL
         <LazyTripItineraryScreen
           onBack={() => navigation.goBack()}
           onSaveTrip={() => navigateToAppScreen(navigation, 'myTrips')}
+          onSelectPlace={placeId => navigation.navigate('PlaceDetail', {placeId})}
         />
       </DeferredScreen>
     </AppShell>
@@ -267,6 +274,7 @@ function ExploreRoute({navigation}: NativeStackScreenProps<ExploreStackParamList
           onBack={() => navigateToAppScreen(navigation, 'home')}
           onSelectCity={city => navigateToAppScreen(navigation, 'home', {screen: 'CityDetail', params: {city}})}
           onSelectVillage={village => navigation.navigate('VillageDetail', {village})}
+          onSelectPlace={placeId => navigation.navigate('PlaceDetail', {placeId})}
         />
       </DeferredScreen>
     </AppShell>
@@ -379,7 +387,10 @@ function RoadsRoute({navigation}: NativeStackScreenProps<MenuStackParamList, 'Ro
         detail: 'Regional map, mountain routes, road distances, and travel guidance across Syunik.',
       }}>
       <DeferredScreen>
-        <LazyRoadScreen onBack={() => goBackOrHome(navigation)} />
+        <LazyRoadScreen
+          onBack={() => goBackOrHome(navigation)}
+          onViewPlace={placeId => navigateToAppScreen(navigation, 'home', {screen: 'PlaceDetail', params: {placeId}})}
+        />
       </DeferredScreen>
     </AppShell>
   );
@@ -411,7 +422,31 @@ function CityDetailRoute({
         detail: `City information, attractions, landmarks, and visitor highlights for ${city}.`,
       }}>
       <DeferredScreen>
-        <LazyCityDetailScreen city={city} onBack={() => goBackOrHome(navigation)} />
+        <LazyCityDetailScreen
+          city={city}
+          onBack={() => goBackOrHome(navigation)}
+          onSelectPlace={placeId => navigation.navigate('PlaceDetail', {placeId})}
+        />
+      </DeferredScreen>
+    </AppShell>
+  );
+}
+
+function PlaceDetailRoute({
+  navigation,
+  route,
+}: NativeStackScreenProps<HomeStackParamList, 'PlaceDetail'>) {
+  return (
+    <AppShell
+      activeScreen="home"
+      onNavigate={screen => navigateToAppScreen(navigation, screen)}
+      assistantContext={{page: 'place-detail', title: 'Syunik place details', detail: 'Location, map, practical information, and nearby recommendations.'}}>
+      <DeferredScreen>
+        <LazyPlaceDetailsScreen
+          placeId={route.params.placeId}
+          onBack={() => goBackOrHome(navigation)}
+          onSelectPlace={placeId => navigation.replace('PlaceDetail', {placeId})}
+        />
       </DeferredScreen>
     </AppShell>
   );
@@ -434,6 +469,26 @@ function VillageDetailRoute({
       }}>
       <DeferredScreen>
         <LazyVillageDetailScreen village={village} onBack={() => goBackOrHome(navigation)} />
+      </DeferredScreen>
+    </AppShell>
+  );
+}
+
+function ExplorePlaceDetailRoute({
+  navigation,
+  route,
+}: NativeStackScreenProps<ExploreStackParamList, 'PlaceDetail'>) {
+  return (
+    <AppShell
+      activeScreen="tourism"
+      onNavigate={screen => navigateToAppScreen(navigation, screen)}
+      assistantContext={{page: 'place-detail', title: 'Syunik place details', detail: 'Location, map, practical information, and nearby recommendations.'}}>
+      <DeferredScreen>
+        <LazyPlaceDetailsScreen
+          placeId={route.params.placeId}
+          onBack={() => goBackOrHome(navigation)}
+          onSelectPlace={placeId => navigation.replace('PlaceDetail', {placeId})}
+        />
       </DeferredScreen>
     </AppShell>
   );
@@ -500,7 +555,7 @@ const tabIcons: Record<keyof MainTabParamList, LucideIcon> = {
 
 const tabLabels: Record<keyof MainTabParamList, string> = {
   Home: 'Home',
-  Explore: 'Trips',
+  Explore: 'Places',
   Food: 'Assistant',
   Menu: 'Menu',
   Profile: 'Profile',

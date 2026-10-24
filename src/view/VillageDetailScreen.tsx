@@ -1,6 +1,7 @@
 import React from 'react';
 import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {topVisitingVillages} from './TourismScreen';
+import {getPlaceById} from '../data/places';
 
 type VillageDetailScreenProps = {
   village: string;
@@ -61,10 +62,10 @@ export function VillageDetailScreen({village, onBack}: VillageDetailScreenProps)
 
       <View style={styles.infoCard}>
         <Text style={styles.sectionTitle}>Most visiting places</Text>
-        {villageData.mostVisitedPlaces.map(place => (
+        {villageData.placeIds.map(placeId => getPlaceById(placeId)).filter((place): place is NonNullable<typeof place> => Boolean(place)).map(place => (
           <View key={place.id} style={styles.placeRow}>
             <Image source={place.image} style={styles.placeImage} resizeMode="cover" />
-            <Text style={styles.placeText}>{place.title}</Text>
+            <Text style={styles.placeText}>{place.name}</Text>
           </View>
         ))}
       </View>

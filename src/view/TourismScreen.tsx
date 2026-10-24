@@ -3,24 +3,29 @@ import {useFocusEffect} from '@react-navigation/native';
 import {Heart} from 'lucide-react-native';
 import {
   Alert,
+  FlatList,
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
   type ImageSourcePropType,
 } from 'react-native';
 import {HeaderBack} from '../components/HeaderBack';
+import {PlaceCard} from '../components/PlaceCard';
 import {CategoryFilter} from '../components/CategoryFilter';
 import {colors} from '../config/theme';
 import {loadFavorites, toggleFavorite} from '../features/profile/services/profileStorage';
 import {profileStrings} from '../features/profile/strings';
+import {usePlacesStore} from '../features/places/store/placesStore';
 
 type TourismScreenProps = {
   onBack: () => void;
   onSelectCity: (city: string) => void;
   onSelectVillage: (villageId: string) => void;
+  onSelectPlace: (placeId: string) => void;
 };
 
 type CitySpot = {
@@ -38,7 +43,7 @@ export type VillageSpot = {
   road: string;
   place: string;
   gallery: ImageSourcePropType[];
-  mostVisitedPlaces: Array<{id: string; title: string; image: ImageSourcePropType}>;
+  placeIds: string[];
 };
 
 const cities: CitySpot[] = [
@@ -100,10 +105,7 @@ export const topVisitingVillages: VillageSpot[] = [
       require('../assets/images/for-travel/hermitage_tatev.png'),
       require('../assets/images/for-travel/syuniks_gate.png'),
     ],
-    mostVisitedPlaces: [
-      {id: 'tatev-monastery', title: 'Tatev Monastery', image: require('../assets/images/for-travel/tatev.png')},
-      {id: 'tatev-cableway', title: 'Tatev Cableway viewpoint', image: require('../assets/images/for-travel/hermitage_tatev.png')},
-    ],
+    placeIds: ['tatev-monastery', 'wings-of-tatev'],
   },
   {
     id: 'khndzoresk',
@@ -118,10 +120,7 @@ export const topVisitingVillages: VillageSpot[] = [
       require('../assets/images/for-travel/khndzoresk_caves.png'),
       require('../assets/images/for-travel/old_goris.png'),
     ],
-    mostVisitedPlaces: [
-      {id: 'khndzoresk-bridge', title: 'Khndzoresk Bridge', image: require('../assets/images/for-travel/khndzoresk.png')},
-      {id: 'khndzoresk-caves', title: 'Cave Village', image: require('../assets/images/for-travel/khndzoresk_caves.png')},
-    ],
+    placeIds: ['khndzoresk-swinging-bridge', 'khndzoresk'],
   },
   {
     id: 'halidzor',
@@ -136,10 +135,7 @@ export const topVisitingVillages: VillageSpot[] = [
       require('../assets/images/for-travel/halizdor-view.png'),
       require('../assets/images/syunik_view.png'),
     ],
-    mostVisitedPlaces: [
-      {id: 'halidzor-fortress', title: 'Halidzor fortress view', image: require('../assets/images/for-travel/halidzor.png')},
-      {id: 'halidzor-viliges', title: 'Halidzor Viliges view', image: require('../assets/images/for-travel/halizdor-view.png')},
-    ],
+    placeIds: ['halidzor-fortress'],
   },
   {
     id: 'shaki',
@@ -154,10 +150,7 @@ export const topVisitingVillages: VillageSpot[] = [
       require('../assets/images/for-travel/vorotnaberd.png'),
       require('../assets/images/moutain.png'),
     ],
-    mostVisitedPlaces: [
-      {id: 'shaki-waterfall', title: 'Shaki Waterfall', image: require('../assets/images/for-travel/shake.png')},
-      {id: 'vorotnaberd', title: 'Vorotnaberd viewpoint', image: require('../assets/images/for-travel/vorotnaberd.png')},
-    ],
+    placeIds: ['shaki-waterfall', 'vorotnaberd'],
   },
 
   {
@@ -173,10 +166,7 @@ export const topVisitingVillages: VillageSpot[] = [
       require('../assets/images/for-travel/syuniks_gate.png'),
       require('../assets/images/syunik_landscape.png'),
     ],
-    mostVisitedPlaces: [
-      {id: 'shikahogh-view', title: 'Shikahogh Viewpoint', image: require('../assets/images/for-travel/shikahox-view.png')},
-      {id: 'shikahogh-valley', title: 'Village Valley', image: require('../assets/images/syunik_landscape.png')},
-    ],
+    placeIds: ['shikahogh'],
   },
   {
     id: 'Khot',
@@ -191,15 +181,12 @@ export const topVisitingVillages: VillageSpot[] = [
       require('../assets/images/for-travel/old_goris.png'),
       require('../assets/images/for-travel/syuniks_gate.png'),
     ],
-    mostVisitedPlaces: [
-      {id: 'khot-village', title: 'Khot Village Center', image: require('../assets/images/for-travel/khot.png')},
-      {id: 'khot-viewpoint', title: 'Khot Viewpoint', image: require('../assets/images/for-travel/old_goris.png')},
-    ],
+    placeIds: ['khot'],
   },
 
 ];
 
-export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismScreenProps) {
+export function TourismScreen({onBack, onSelectCity, onSelectVillage, onSelectPlace}: TourismScreenProps) {
 
   /**
    * 
@@ -212,11 +199,30 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
   const [selectedCategory, setSelectedCategory] = useState<'All' | 'Cities' | 'Villages'>('All');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoriteMessage, setFavoriteMessage] = useState('');
+  const places = usePlacesStore(state => state.places);
+  const favoritePlaceIds = usePlacesStore(state => state.favoritePlaceIds);
+  const togglePlaceFavorite = usePlacesStore(state => state.toggleFavorite);
+  const placeQuery = usePlacesStore(state => state.searchQuery);
+  const placeCategory = usePlacesStore(state => state.selectedCategory);
+  const setPlaceQuery = usePlacesStore(state => state.setSearchQuery);
+  const setPlaceCategory = usePlacesStore(state => state.setCategory);
   const visibleCities = useMemo(
     () => (selectedCategory === 'Villages' ? [] : cities),
     [selectedCategory],
   );
   const showVillages = selectedCategory !== 'Cities';
+  const placeResults = useMemo(() => {
+    const normalizedQuery = placeQuery.trim().toLocaleLowerCase();
+    return places.filter(place => {
+      const matchesCategory = placeCategory === 'all' || place.category === placeCategory;
+      const matchesQuery = !normalizedQuery || [place.name, place.cityName, place.category, ...place.tags]
+        .join(' ')
+        .toLocaleLowerCase()
+        .includes(normalizedQuery);
+      return matchesCategory && matchesQuery;
+    });
+  }, [placeCategory, placeQuery, places]);
+  const featuredPlaces = useMemo(() => places.filter(place => place.isFeatured), [places]);
 
   useFocusEffect(
     useCallback(() => {
@@ -276,6 +282,74 @@ export function TourismScreen({onBack, onSelectCity, onSelectVillage}: TourismSc
         />
 
         <View style={styles.filterSpacing} />
+
+        <View style={styles.discoverySection}>
+          <Text style={styles.discoveryTitle}>Discover Syunik</Text>
+          <TextInput
+            accessibilityLabel="Search places"
+            onChangeText={setPlaceQuery}
+            placeholder="Search places…"
+            placeholderTextColor={colors.textMuted}
+            style={styles.placeSearch}
+            value={placeQuery}
+          />
+          <Text style={styles.placeSectionTitle}>Featured</Text>
+          <FlatList
+            data={featuredPlaces}
+            horizontal
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <PlaceCard
+                place={item}
+                isFavorite={favoritePlaceIds.includes(item.id)}
+                onPress={() => onSelectPlace(item.id)}
+                onToggleFavorite={() => {
+                  togglePlaceFavorite(item.id);
+                  setFavoriteMessage(favoritePlaceIds.includes(item.id) ? `${item.name} removed from favorites.` : `${item.name} added to favorites.`);
+                }}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.placeList}
+          />
+          <Text style={styles.placeSectionTitle}>Categories</Text>
+          <FlatList
+            data={['all', 'nature', 'history', 'culture', 'adventure', 'food', 'photography', 'relaxation'] as const}
+            horizontal
+            keyExtractor={item => item}
+            renderItem={({item}) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{selected: placeCategory === item}}
+                onPress={() => setPlaceCategory(item)}
+                style={[styles.placeCategory, placeCategory === item && styles.placeCategorySelected]}>
+                <Text style={[styles.placeCategoryText, placeCategory === item && styles.placeCategoryTextSelected]}>{item === 'all' ? 'All' : item}</Text>
+              </Pressable>
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.placeCategories}
+          />
+          <Text style={styles.placeSectionTitle}>All Places</Text>
+          <FlatList
+            data={placeResults}
+            horizontal
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <PlaceCard
+                place={item}
+                isFavorite={favoritePlaceIds.includes(item.id)}
+                onPress={() => onSelectPlace(item.id)}
+                onToggleFavorite={() => {
+                  togglePlaceFavorite(item.id);
+                  setFavoriteMessage(favoritePlaceIds.includes(item.id) ? `${item.name} removed from favorites.` : `${item.name} added to favorites.`);
+                }}
+              />
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.placeList}
+            ListEmptyComponent={<Text style={styles.emptyPlaces}>No places found. Try another search.</Text>}
+          />
+        </View>
 
         {!!favoriteMessage && <Text accessibilityRole="text" style={styles.favoriteMessage}>{favoriteMessage}</Text>}
 
@@ -386,6 +460,66 @@ const styles = StyleSheet.create({
   },
   filterSpacing: {
     height: 14,
+  },
+  discoverySection: {
+    marginBottom: 20,
+  },
+  discoveryTitle: {
+    color: colors.text,
+    fontSize: 27,
+    fontWeight: '800',
+    marginBottom: 10,
+  },
+  placeSearch: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 13,
+    borderWidth: 1,
+    color: colors.text,
+    fontSize: 15,
+    minHeight: 48,
+    paddingHorizontal: 15,
+  },
+  placeSectionTitle: {
+    color: colors.text,
+    fontSize: 19,
+    fontWeight: '800',
+    marginBottom: 10,
+    marginTop: 20,
+  },
+  placeList: {
+    gap: 12,
+    paddingBottom: 2,
+  },
+  placeCategories: {
+    gap: 8,
+    paddingBottom: 2,
+  },
+  placeCategory: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  placeCategorySelected: {
+    backgroundColor: colors.brand,
+    borderColor: colors.brand,
+  },
+  placeCategoryText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
+  placeCategoryTextSelected: {
+    color: colors.white,
+  },
+  emptyPlaces: {
+    color: colors.textMuted,
+    fontSize: 13,
+    paddingVertical: 20,
   },
   card: {
     position: 'relative',

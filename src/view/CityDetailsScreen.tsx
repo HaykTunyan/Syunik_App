@@ -28,23 +28,24 @@ import {
 import { AttractionsCarousel } from '../components/AttractionsCarousel';
 import {CategoryFilter} from '../components/CategoryFilter';
 import { citiesData } from '../data/citiesData';
-import { historicalPlacesByCity } from '../data/historicalPlaces';
+import {getPlacesForCity} from '../data/places';
 import {fetchWeatherForecast, type WeatherForecast} from '../services/weatherService';
 
 
 type CityDetailScreenProps = {
   city: string;
   onBack: () => void;
+  onSelectPlace: (placeId: string) => void;
 };
 
-export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
+export function CityDetailScreen({ city, onBack, onSelectPlace }: CityDetailScreenProps) {
   /**
    * City Detail Screen is a React component that displays detailed information about a specific city in the Syunik region. It includes a back button, a hero image of the city, the city's title, and a description. The component uses a ScrollView to allow users to scroll through the content vertically.
    */
 
   const cityData = citiesData.find(c => c.latinName === city);
 
-  const historicalPlaces = historicalPlacesByCity.find(item => item.city === city)?.places ?? [];
+  const cityPlaces = cityData ? getPlacesForCity(cityData.id) : [];
 
   const [weather, setWeather] = useState<WeatherForecast | null>(null);
   const [weatherStatus, setWeatherStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -156,12 +157,18 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       {(selectedCategory === 'Overview' || selectedCategory === 'Places') && (
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Most visited place</Text>
-          {cityData.mostVisitedPlace.map(place => (
-            <View key={place.id} style={styles.mostVisitedWrap}>
+          {cityPlaces.map(place => (
+            <Pressable
+              key={place.id}
+              style={styles.mostVisitedWrap}
+              onPress={() => onSelectPlace(place.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${place.name}`}>
               <Image source={place.image} style={styles.mostVisitedImage} resizeMode="cover" />
-              <Text style={styles.highlightText}>{place.text}</Text>
-            </View>
+              <Text style={styles.highlightText}>{place.name}</Text>
+            </Pressable>
           ))}
+          {cityPlaces.length === 0 && <Text style={styles.emptyPlacesText}>Places for this city are being verified.</Text>}
         </View>
       )}
 
@@ -181,7 +188,9 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
       {(selectedCategory === 'Overview' || selectedCategory === 'Attractions') && (
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Attractions</Text>
-          <AttractionsCarousel attractions={cityData.attractions} />
+          <AttractionsCarousel
+            attractions={cityPlaces.map(place => ({id: place.id, image: place.image}))}
+          />
         </View>
       )}
 
@@ -194,10 +203,10 @@ export function CityDetailScreen({ city, onBack }: CityDetailScreenProps) {
             </View>
             <Text style={styles.historyIcon}>🏛️</Text>
           </View>
-          {historicalPlaces.map(place => (
+          {cityPlaces.filter(place => place.category === 'history').map(place => (
             <View key={place.name} style={styles.historyPlaceRow}>
               <Text style={styles.historyPlaceName}>{place.name}</Text>
-              <Text style={styles.historyPlaceAddress}>{place.address}</Text>
+              <Text style={styles.historyPlaceAddress}>{place.address ?? place.cityName}</Text>
             </View>
           ))}
         </View>
@@ -603,6 +612,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 24,
     flex: 1,
+  },
+  emptyPlacesText: {
+    color: '#687362',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 8,
   },
   infoRow: {
     borderBottomColor: '#eee5d9',

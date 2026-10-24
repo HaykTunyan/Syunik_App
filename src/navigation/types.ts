@@ -13,11 +13,13 @@ export type HomeStackParamList = {
   PlanMyTrip: undefined;
   TripItinerary: undefined;
   CityDetail: {city: string};
+  PlaceDetail: {placeId: string};
 };
 
 export type ExploreStackParamList = {
   Explore: undefined;
   VillageDetail: {village: string};
+  PlaceDetail: {placeId: string};
 };
 
 export type MenuStackParamList = {

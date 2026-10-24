@@ -29,11 +29,11 @@ import {useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors} from '../config/theme';
 import {HeaderBack} from '../components/HeaderBack';
-import {citiesData} from '../data/citiesData';
 import {PlaceSearchInput} from '../features/profile/components/PlaceSearchInput';
 import {useTripPlannerStore} from '../features/trips/store/tripPlannerStore';
 import type {Trip, TripDuration} from '../features/trips/types';
 import {searchPlaces, type Place} from '../features/profile/data/places';
+import {getPlaceById} from '../data/places';
 import {
   addTripStop,
   deleteTripStop,
@@ -81,22 +81,7 @@ function getDirectionsUrl(place: string, city: string): string {
 }
 
 function searchTripPlaces(query: string): Place[] {
-  const normalizedQuery = query.trim().toLocaleLowerCase();
-  if (!normalizedQuery) {
-    return [];
-  }
-
-  const cities = citiesData
-    .filter(city =>
-      `${city.name} ${city.latinName}`.toLocaleLowerCase().includes(normalizedQuery),
-    )
-    .map(city => ({
-      id: `city-${city.latinName.toLocaleLowerCase()}`,
-      name: city.latinName,
-      city: city.latinName,
-    }));
-
-  return [...cities, ...searchPlaces(query, 8)].slice(0, 8);
+  return searchPlaces(query, 8);
 }
 
 type TripStopCardProps = {
@@ -129,14 +114,14 @@ const TripStopCard = memo(function TripStopCardView({
           <MapPin size={19} color={colors.brand} />
         </View>
         <View style={styles.stopTitleArea}>
-          <Text style={styles.stopTitle}>{stop.place}</Text>
-          <Text style={styles.stopCity}>{stop.city}, Syunik</Text>
+          <Text style={styles.stopTitle}>{getPlaceById(stop.placeId)?.name ?? 'Place unavailable'}</Text>
+          <Text style={styles.stopCity}>{getPlaceById(stop.placeId)?.cityName ?? 'Syunik'}, Syunik</Text>
         </View>
         <Pressable
           onPress={remove}
           style={({pressed}) => [styles.iconButton, pressed && styles.pressed]}
           accessibilityRole="button"
-          accessibilityLabel={`Remove ${stop.place} from My Trips`}>
+          accessibilityLabel={`Remove ${getPlaceById(stop.placeId)?.name ?? 'place'} from My Trips`}>
           <Trash2 size={18} color={colors.accent} />
         </Pressable>
       </View>
@@ -165,7 +150,7 @@ const TripStopCard = memo(function TripStopCardView({
           onPress={directions}
           style={({pressed}) => [styles.actionButton, pressed && styles.pressed]}
           accessibilityRole="button"
-          accessibilityLabel={`Open route to ${stop.place}`}>
+          accessibilityLabel={`Open route to ${getPlaceById(stop.placeId)?.name ?? 'place'}`}>
           <Navigation size={16} color={colors.white} />
           <Text style={styles.actionButtonText}>Open route</Text>
         </Pressable>
@@ -173,7 +158,7 @@ const TripStopCard = memo(function TripStopCardView({
           onPress={share}
           style={({pressed}) => [styles.shareButton, pressed && styles.pressed]}
           accessibilityRole="button"
-          accessibilityLabel={`Share trip to ${stop.place}`}>
+          accessibilityLabel={`Share trip to ${getPlaceById(stop.placeId)?.name ?? 'place'}`}>
           <Share2 size={17} color={colors.brand} />
           <Text style={styles.shareButtonText}>Share</Text>
         </Pressable>
@@ -269,8 +254,7 @@ export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
     try {
       const nextStops = await addTripStop({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        place: selectedPlace.name,
-        city: selectedPlace.city,
+        placeId: selectedPlace.id,
         scheduledAt: scheduledAt.toISOString(),
         restaurant: restaurant.trim(),
       });
@@ -294,7 +278,7 @@ export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
       : '';
     try {
       await Share.share({
-        message: `My trip to ${stop.place}, ${stop.city}\n${formatDateTime(stop.scheduledAt)}${restaurantNote}`,
+        message: `My trip to ${getPlaceById(stop.placeId)?.name ?? 'a Syunik place'}, ${getPlaceById(stop.placeId)?.cityName ?? 'Syunik'}\n${formatDateTime(stop.scheduledAt)}${restaurantNote}`,
       });
     } catch {
       Alert.alert('Sharing unavailable', 'Could not share this trip stop.');
@@ -309,7 +293,8 @@ export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
     const itinerary = visibleStops
       .map(stop => {
         const meal = stop.restaurant ? ` — Restaurant: ${stop.restaurant}` : '';
-        return `• ${formatDateTime(stop.scheduledAt)}: ${stop.place}, ${stop.city}${meal}`;
+        const place = getPlaceById(stop.placeId);
+        return `• ${formatDateTime(stop.scheduledAt)}: ${place?.name ?? 'Place unavailable'}, ${place?.cityName ?? 'Syunik'}${meal}`;
       })
       .join('\n');
 
@@ -321,7 +306,7 @@ export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
   }, [visibleStops]);
 
   const confirmDeleteStop = useCallback((stop: SavedTripStop) => {
-    Alert.alert('Remove trip stop?', `Remove ${stop.place} from My Trips?`, [
+          Alert.alert('Remove trip stop?', `Remove ${getPlaceById(stop.placeId)?.name ?? 'place'} from My Trips?`, [
       {text: 'Cancel', style: 'cancel'},
       {
         text: 'Remove',
@@ -337,7 +322,11 @@ export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
 
   const openDirections = useCallback(async (stop: SavedTripStop) => {
     try {
-      await Linking.openURL(getDirectionsUrl(stop.place, stop.city));
+      const place = getPlaceById(stop.placeId);
+      if (!place) {
+        return;
+      }
+      await Linking.openURL(getDirectionsUrl(place.name, place.cityName));
     } catch {
       Alert.alert('Maps unavailable', 'Could not open directions for this destination.');
     }
@@ -345,7 +334,7 @@ export function MyTripsScreen({onBack, onOpenTrip}: MyTripsScreenProps) {
 
   const openRestaurantDirections = useCallback(async (stop: SavedTripStop) => {
     try {
-      await Linking.openURL(getDirectionsUrl(stop.restaurant, stop.city));
+      await Linking.openURL(getDirectionsUrl(stop.restaurant, getPlaceById(stop.placeId)?.cityName ?? 'Syunik'));
     } catch {
       Alert.alert('Maps unavailable', 'Could not open directions for this restaurant.');
     }

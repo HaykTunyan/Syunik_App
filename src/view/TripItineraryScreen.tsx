@@ -4,12 +4,13 @@ import {Bot, Check, Clock3, MapPin, Navigation, Save, Sparkles} from 'lucide-rea
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {HeaderBack} from '../components/HeaderBack';
 import {colors} from '../config/theme';
+import {getPlaceById} from '../data/places';
 import {useTripPlannerStore, type ItineraryItem} from '../features/trips/store/tripPlannerStore';
 import type {TripInterest, TripDuration, TransportType} from '../features/trips/types';
 
-type TripItineraryScreenProps = {onBack: () => void; onSaveTrip: () => void};
+type TripItineraryScreenProps = {onBack: () => void; onSaveTrip: () => void; onSelectPlace: (placeId: string) => void};
 
-export function TripItineraryScreen({onBack, onSaveTrip}: TripItineraryScreenProps) {
+export function TripItineraryScreen({onBack, onSaveTrip, onSelectPlace}: TripItineraryScreenProps) {
   const preferences = useTripPlannerStore(state => state.preferences);
   const insets = useSafeAreaInsets();
   const itinerary = useTripPlannerStore(state => state.itinerary);
@@ -24,7 +25,7 @@ export function TripItineraryScreen({onBack, onSaveTrip}: TripItineraryScreenPro
 
   const totalDistance = itinerary.length * 18;
   const totalDuration = itinerary.reduce(
-    (total, item) => total + item.durationMinutes + (item.travelTimeMinutes ?? 0),
+    (total, item) => total + (getPlaceById(item.placeId)?.recommendedDuration ?? 0) + (item.travelTimeMinutes ?? 0),
     0,
   );
 
@@ -38,8 +39,8 @@ export function TripItineraryScreen({onBack, onSaveTrip}: TripItineraryScreenPro
   }, [onSaveTrip, saveGeneratedTrip, saved]);
 
   const renderStop = useCallback(({item, index}: {item: ItineraryItem; index: number}) => (
-    <ItineraryStop item={item} index={index} />
-  ), []);
+    <ItineraryStop item={item} index={index} onPress={() => onSelectPlace(item.placeId)} />
+  ), [onSelectPlace]);
 
   return (
     <FlatList
@@ -102,16 +103,21 @@ export function TripItineraryScreen({onBack, onSaveTrip}: TripItineraryScreenPro
   );
 }
 
-function ItineraryStop({item, index}: {item: ItineraryItem; index: number}) {
+function ItineraryStop({item, index, onPress}: {item: ItineraryItem; index: number; onPress: () => void}) {
+  const place = getPlaceById(item.placeId);
+  if (!place) {
+    return null;
+  }
+
   return (
     <View>
       {index > 0 && item.travelTimeMinutes && <View style={styles.travelConnector}><View style={styles.connectorLine} /><Text style={styles.travelText}>🚗 {item.travelTimeMinutes} min</Text><View style={styles.connectorLine} /></View>}
-      <View style={styles.stopCard}>
+      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`Open details for ${place.name}`} style={styles.stopCard}>
         <View style={styles.stopTimeRow}><Clock3 size={15} color={colors.accent} /><Text style={styles.stopTime}>{item.time}</Text><Text style={styles.stopDay}>DAY {item.day}</Text></View>
-        <View style={styles.stopTitleRow}><View style={styles.placeIcon}><MapPin size={17} color={colors.brand} /></View><View style={styles.stopTitleArea}><Text style={styles.stopTitle}>{item.title}</Text><Text style={styles.stopCity}>{item.city}, Syunik</Text></View></View>
-        <Text style={styles.stopDescription}>{item.description}</Text>
-        <View style={styles.stopDuration}><Clock3 size={14} color={colors.textMuted} /><Text style={styles.stopDurationText}>{formatStopDuration(item.durationMinutes)}</Text></View>
-      </View>
+        <View style={styles.stopTitleRow}><View style={styles.placeIcon}><MapPin size={17} color={colors.brand} /></View><View style={styles.stopTitleArea}><Text style={styles.stopTitle}>{place.name}</Text><Text style={styles.stopCity}>{place.cityName}, Syunik</Text></View></View>
+        <Text style={styles.stopDescription}>{place.shortDescription ?? place.description}</Text>
+        <View style={styles.stopDuration}><Clock3 size={14} color={colors.textMuted} /><Text style={styles.stopDurationText}>{formatStopDuration(place.recommendedDuration)}</Text></View>
+      </Pressable>
     </View>
   );
 }

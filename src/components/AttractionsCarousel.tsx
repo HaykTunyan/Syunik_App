@@ -7,7 +7,9 @@ import {
   View,
 } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
-import type { Attraction } from '../data/citiesData';
+import type {ImageSourcePropType} from 'react-native';
+
+type Attraction = {id: string; image: ImageSourcePropType};
 
 type AttractionsCarouselProps = {
   attractions: Attraction[];

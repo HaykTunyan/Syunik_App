@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import {CITIES, type CityCard} from '../data/cities';
 import {citiesData} from '../data/citiesData';
+import {getPlaceById, type Place} from '../data/places';
 import {SectionHeader} from '../components/SectionHeader';
 
 type HomeScreenProps = {
@@ -19,6 +20,7 @@ type HomeScreenProps = {
   onSelectCity: (city: string) => void;
   onPlanTrip: () => void;
   onExplore: () => void;
+  onSelectPlace: (placeId: string) => void;
 };
 
 const QUICK_CATEGORIES = [
@@ -30,38 +32,17 @@ const QUICK_CATEGORIES = [
   {label: 'Culture', icon: '🏘'},
 ];
 
-const POPULAR_ATTRACTIONS = [
-  {
-    id: 'Tatev Monastery',
-    image: require('../assets/images/for-travel/tatev.png'),
-    location: 'Goris area',
-    city: 'Goris',
-  },
-  {
-    id: 'Old Khndzoresk',
-    image: require('../assets/images/for-travel/khndzoresk_caves.png'),
-    location: 'Goris area',
-    city: 'Goris',
-  },
-  {
-    id: "Satan's Bridge",
-    image: require('../assets/images/for-travel/devils_bridge.png'),
-    location: 'Tatev road',
-    city: 'Goris',
-  },
-  {
-    id: 'Khustup',
-    image: require('../assets/images/for-travel/khustup.png'),
-    location: 'Kapan area',
-    city: 'Kapan',
-  },
-  {
-    id: 'Zorats Karer',
-    image: require('../assets/images/for-travel/karahunj.png'),
-    location: 'Sisian area',
-    city: 'Sisian',
-  },
-];
+const POPULAR_PLACE_IDS = [
+  'tatev-monastery',
+  'khndzoresk',
+  'devils-bridge',
+  'khustup-mountain',
+  'zorats-karer',
+] as const;
+
+const POPULAR_ATTRACTIONS: Place[] = POPULAR_PLACE_IDS
+  .map(placeId => getPlaceById(placeId))
+  .filter((place): place is Place => Boolean(place));
 
 function CityCardItem({city, onPress}: {city: CityCard; onPress: () => void}) {
 
@@ -101,7 +82,7 @@ function chunkIntoRows<T>(items: T[], size: number): T[][] {
   return rows;
 }
 
-export function HomeScreen({contentContainerStyle, onSelectCity, onPlanTrip, onExplore}: HomeScreenProps) {
+export function HomeScreen({contentContainerStyle, onSelectCity, onPlanTrip, onExplore, onSelectPlace}: HomeScreenProps) {
   const [query, setQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
@@ -123,7 +104,7 @@ export function HomeScreen({contentContainerStyle, onSelectCity, onPlanTrip, onE
   const showSuggestions = isSearchFocused && query.trim().length > 0;
 
   const totalAttractions = useMemo(
-    () => citiesData.reduce((sum, c) => sum + c.attractions.length, 0),
+    () => citiesData.reduce((sum, city) => sum + city.placeIds.length, 0),
     [],
   );
 
@@ -352,13 +333,15 @@ export function HomeScreen({contentContainerStyle, onSelectCity, onPlanTrip, onE
           {POPULAR_ATTRACTIONS.map(place => (
             <Pressable
               key={place.id}
-              onPress={() => onSelectCity(place.city)}
+              onPress={() => onSelectPlace(place.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${place.name}`}
               style={({pressed}) => [styles.attractionCard, pressed && styles.cardPressed]}>
               <Image source={place.image} resizeMode="cover" style={styles.attractionImage} />
               <View style={styles.attractionScrim} />
               <View style={styles.attractionInfo}>
-                <Text style={styles.attractionName}>{place.id}</Text>
-                <Text style={styles.attractionLocation}>📍 {place.location}</Text>
+                <Text style={styles.attractionName}>{place.name}</Text>
+                <Text style={styles.attractionLocation}>📍 {place.cityName}</Text>
               </View>
             </Pressable>
           ))}
