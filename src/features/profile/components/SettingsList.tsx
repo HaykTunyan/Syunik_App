@@ -4,6 +4,7 @@ import {Alert, Pressable, StyleSheet, Switch, Text, View} from 'react-native';
 import {colors} from '../../../config/theme';
 import type {ProfileLanguage} from '../services/profileStorage';
 import {profileStrings} from '../strings';
+import {useTranslation} from 'react-i18next';
 
 type SettingsListProps = {
   language: ProfileLanguage;
@@ -12,10 +13,24 @@ type SettingsListProps = {
   onChangeLanguage: (language: ProfileLanguage) => void;
   onToggleNotifications: (enabled: boolean) => void;
   onToggleLocation: (enabled: boolean) => void;
-  onShareLocation: () => void;
+  // onShareLocation: () => void;
 };
 
-const languages: ProfileLanguage[] = ['HY', 'EN', 'RU'];
+const languages: Array<{code: ProfileLanguage; labelKey: 'settings.languageArmenian' | 'settings.languageEnglish' | 'settings.languageRussian'}> = [
+  {
+    code: 'HY', 
+    labelKey: 'settings.languageArmenian',
+
+  },
+  {
+    code: 'EN', 
+    labelKey: 'settings.languageEnglish'
+  },
+  { 
+    code: 'RU', 
+    labelKey: 'settings.languageRussian'
+  },
+];
 
 export function SettingsList({
   language,
@@ -24,8 +39,9 @@ export function SettingsList({
   onChangeLanguage,
   onToggleNotifications,
   onToggleLocation,
-  onShareLocation,
+  // onShareLocation,
 }: SettingsListProps) {
+  const {t} = useTranslation();
 
 
   /**
@@ -60,13 +76,16 @@ export function SettingsList({
         <View style={styles.languageOptions} accessibilityRole="radiogroup">
           {languages.map(option => (
             <Pressable
-              key={option}
-              onPress={() => onChangeLanguage(option)}
-              style={[styles.languageOption, language === option && styles.languageSelected]}
+              key={option.code}
+              onPress={() => onChangeLanguage(option.code)}
+              style={[styles.languageOption, language === option.code && styles.languageSelected]}
               accessibilityRole="radio"
-              accessibilityState={{selected: language === option}}
-              accessibilityLabel={option}>
-              <Text style={[styles.languageText, language === option && styles.languageTextSelected]}>{option}</Text>
+              accessibilityState={{selected: language === option.code}}
+              accessibilityLabel={t(option.labelKey)}>
+              <Text style={[styles.languageText, language === option.code && styles.languageTextSelected]}>
+                {t(option.code)}
+              </Text>
+              {/* {language === option.code && <Text style={styles.checkmark}>✓</Text>} */}
             </Pressable>
           ))}
         </View>
@@ -108,7 +127,8 @@ export function SettingsList({
         />
       </View>
 
-      <Pressable
+      {/*  */}
+      {/* <Pressable
         onPress={onShareLocation}
         disabled={!locationEnabled}
         style={({pressed}) => [
@@ -130,7 +150,10 @@ export function SettingsList({
           ]}>
           {profileStrings.settings.shareLocation}
         </Text>
-      </Pressable>
+      </Pressable> */}
+
+      {/*  */}
+
 
       {/* <Pressable
         onPress={() => Alert.alert(profileStrings.settings.logout, profileStrings.settings.logoutUnavailable)}
@@ -170,6 +193,7 @@ const styles = StyleSheet.create({
   languageSelected: {backgroundColor: colors.brand},
   languageText: {color: colors.textSecondary, fontSize: 12, fontWeight: '700'},
   languageTextSelected: {color: colors.white},
+  checkmark: {color: colors.white, fontSize: 12, fontWeight: '800', marginLeft: 3},
   actionRow: {minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.inputBorder},
   deleteLabel: {flex: 1, color: colors.accent, fontSize: 14, fontWeight: '700'},
   disabledAction: {opacity: 0.55},

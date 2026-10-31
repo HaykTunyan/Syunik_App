@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {useTranslation} from 'react-i18next';
 
 type NamePromptModalProps = {
   visible: boolean;
@@ -17,6 +18,7 @@ type NamePromptModalProps = {
 };
 
 export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps) {
+  const {t} = useTranslation();
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const inputRef = useRef<TextInput>(null);
@@ -42,7 +44,7 @@ export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps)
       await onSave(trimmedName);
       setMessage('');
     } catch {
-      setMessage('Could not save your name. Please try again.');
+      setMessage(t('namePrompt.saveError'));
     }
   };
 
@@ -57,16 +59,16 @@ export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps)
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.card}>
-          <Text style={styles.eyebrow}>WELCOME TO SYUNIK</Text>
-          <Text style={styles.title}>What should we call you?</Text>
-          <Text style={styles.description}>Tell us your name to make your travel companion feel more personal.</Text>
+          <Text style={styles.eyebrow}>{t('common.welcome')}</Text>
+          <Text style={styles.title}>{t('namePrompt.title')}</Text>
+          <Text style={styles.description}>{t('namePrompt.description')}</Text>
           {!!message && <Text style={styles.errorMessage}>{message}</Text>}
           <TextInput
             ref={inputRef}
             autoFocus
             value={name}
             onChangeText={setName}
-            placeholder="Your name"
+            placeholder={t('common.yourName')}
             placeholderTextColor="#9a9a92"
             autoCapitalize="words"
             showSoftInputOnFocus
@@ -74,10 +76,10 @@ export function NamePromptModal({visible, onSave, onSkip}: NamePromptModalProps)
             style={styles.input}
           />
           <Pressable onPress={save} disabled={!name.trim()} style={[styles.saveButton, !name.trim() && styles.disabledButton]}>
-            <Text style={styles.saveButtonText}>Continue</Text>
+            <Text style={styles.saveButtonText}>{t('common.continue')}</Text>
           </Pressable>
           <Pressable onPress={onSkip} style={styles.skipButton}>
-            <Text style={styles.skipText}>Maybe later</Text>
+            <Text style={styles.skipText}>{t('common.maybeLater')}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>

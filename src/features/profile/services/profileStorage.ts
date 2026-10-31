@@ -15,6 +15,9 @@ export type StoredProfileData = {
   notificationsEnabled: boolean;
 };
 
+
+
+
 export type PersonalInfo = {
   email: string;
   phone: string;

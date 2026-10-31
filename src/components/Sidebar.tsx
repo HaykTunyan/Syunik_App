@@ -3,6 +3,7 @@ import {Modal, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {navigationMenuItems} from '../navigation/menuItems';
 import type {AppScreen} from '../navigation/types';
+import {useTranslation} from 'react-i18next';
 
 type SidebarProps = {
   isOpen: boolean;
@@ -20,12 +21,13 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
    */
 
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
 
   return (
     <Modal transparent visible={isOpen} animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <Pressable
-          accessibilityLabel="Close navigation menu"
+          accessibilityLabel={t('common.closeMenu')}
           accessibilityRole="button"
           style={styles.backdrop}
           onPress={onClose}
@@ -40,11 +42,11 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
               </View>
               <View>
                 <Text style={styles.drawerTitle}>Syunik Dreams</Text>
-                <Text style={styles.drawerSubtitle}>Travel companion</Text>
+                <Text style={styles.drawerSubtitle}>{t('menu.travelCompanion')}</Text>
               </View>
             </View>
             <Pressable
-              accessibilityLabel="Close navigation menu"
+              accessibilityLabel={t('common.closeMenu')}
               accessibilityRole="button"
               hitSlop={8}
               onPress={onClose}
@@ -53,7 +55,7 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
             </Pressable>
           </View>
 
-          <Text style={styles.navigationLabel}>NAVIGATION</Text>
+          <Text style={styles.navigationLabel}>{t('menu.navigation')}</Text>
           <ScrollView
             style={styles.navigationScroll}
             contentContainerStyle={styles.navigationList}
@@ -66,7 +68,7 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
                   key={item.key}
                   accessibilityRole="button"
                   accessibilityState={{selected: isActive}}
-                  accessibilityLabel={`${item.label}. ${item.description}`}
+                  accessibilityLabel={`${localizedMenuLabel(item.key, t)}. ${localizedMenuDescription(item.key, t)}`}
                   style={({pressed}) => [
                     styles.menuItem,
                     isActive && styles.activeMenuItem,
@@ -78,10 +80,10 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
                   </View>
                   <View style={styles.menuItemContent}>
                     <Text style={[styles.menuLabel, isActive && styles.activeMenuLabel]}>
-                      {item.label}
+                      {localizedMenuLabel(item.key, t)}
                     </Text>
                     <Text style={[styles.menuDescription, isActive && styles.activeMenuDescription]}>
-                      {item.description}
+                      {localizedMenuDescription(item.key, t)}
                     </Text>
                   </View>
                   <Text style={[styles.menuArrow, isActive && styles.activeMenuArrow]}>›</Text>
@@ -91,13 +93,21 @@ export function Sidebar({isOpen, activeScreen, onClose, onSelectScreen}: Sidebar
           </ScrollView>
 
           <View style={styles.footerCard}>
-            <Text style={styles.footerEyebrow}>EXPLORE SYUNIK</Text>
-            <Text style={styles.footerText}>Mountains, heritage, and warm hospitality.</Text>
+            <Text style={styles.footerEyebrow}>{t('menu.explore')}</Text>
+            <Text style={styles.footerText}>{t('menu.footer')}</Text>
           </View>
         </View>
       </View>
     </Modal>
   );
+}
+
+function localizedMenuLabel(key: AppScreen, t: (key: string) => string) {
+  return t(`nav.${key === 'myTrips' ? 'myTrips' : key}`);
+}
+
+function localizedMenuDescription(key: AppScreen, t: (key: string) => string) {
+  return t(`nav.${key === 'myTrips' ? 'myTrips' : key}Description`);
 }
 
 const styles = StyleSheet.create({

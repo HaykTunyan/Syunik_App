@@ -9,6 +9,8 @@ import {colors} from './config/theme';
 import {ProfileProvider, useProfile} from './features/profile/context/ProfileProvider';
 import {navigationRef} from './navigation/navigationRef';
 import {RootNavigator} from './navigation/RootNavigator';
+import {initializeI18n} from './i18n';
+import {LanguageSwitchProvider} from './providers/LanguageSwitchProvider';
 import {
   resolveSyunikDestination,
   type AssistantDestination,
@@ -24,6 +26,17 @@ import {
 
 export default function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const [isI18nReady, setIsI18nReady] = useState(false);
+
+  useEffect(() => {
+    initializeI18n()
+      .catch(error => console.error('Could not initialize translations.', error))
+      .finally(() => setIsI18nReady(true));
+  }, []);
+
+  if (!isI18nReady) {
+    return null;
+  }
 
   return (
     <SafeAreaProvider>
@@ -32,7 +45,9 @@ export default function App() {
         backgroundColor={colors.background}
       />
       <ProfileProvider>
-        <AppContent />
+        <LanguageSwitchProvider>
+          <AppContent />
+        </LanguageSwitchProvider>
       </ProfileProvider>
     </SafeAreaProvider>
   );

@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  Share,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,7 +23,6 @@ import {VisitHistory, type Visit} from '../features/profile/components/VisitHist
 import {ProfileErrorState, ProfileSkeleton} from '../features/profile/components/ProfileLoadingState';
 import {SettingsList} from '../features/profile/components/SettingsList';
 import type {Place} from '../features/profile/data/places';
-import type {GeoPosition} from 'react-native-geolocation-service';
 import {
   loadProfileData as loadStoredProfileData,
   loadFavorites,
@@ -37,6 +35,7 @@ import {
 } from '../features/profile/services/profileStorage';
 import {setFirebaseNotificationsEnabled} from '../services/notificationService';
 import {colors} from '../config/theme';
+import {useLanguageSwitch} from '../providers/LanguageSwitchProvider';
 
 type ProfileScreenProps = {
   name: string;
@@ -65,10 +64,11 @@ export function ProfileScreen({
   const [visits, setVisits] = useState<Visit[]>([]);
   const [isProfileDataLoaded, setIsProfileDataLoaded] = useState(false);
   const [loadingError, setLoadingError] = useState('');
-  const [language, setLanguage] = useState<ProfileLanguage>('EN');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [message, setMessage] = useState('');
+  const {currentLanguage, changeLanguage} = useLanguageSwitch();
+  const activeLanguage: ProfileLanguage = currentLanguage === 'hy' ? 'HY' : currentLanguage === 'ru' ? 'RU' : 'EN';
   const scrollRef = useRef<ScrollView>(null);
   const scrollOffset = useRef(0);
   const {
@@ -108,14 +108,13 @@ export function ProfileScreen({
       setPhotoUri(stored.photoUri);
       setFavorites(stored.favorites);
       setVisits(stored.visits);
-      setLanguage(stored.language);
       setNotificationsEnabled(stored.notificationsEnabled);
       setMessage('');
       if (stored.notificationsEnabled) {
         try {
           const isFirebaseEnabled = await setFirebaseNotificationsEnabled(true, false);
           if (!isFirebaseEnabled) {
-            await saveProfileSettings(stored.language, false);
+            await saveProfileSettings(activeLanguage, false);
             setNotificationsEnabled(false);
           }
         } catch {
@@ -127,7 +126,7 @@ export function ProfileScreen({
     } finally {
       setIsProfileDataLoaded(true);
     }
-  }, [hydrate, name]);
+  }, [activeLanguage, hydrate, name]);
 
   useEffect(() => {
     loadProfile();
@@ -246,8 +245,10 @@ export function ProfileScreen({
 
   const updateLanguage = async (nextLanguage: ProfileLanguage) => {
     try {
-      await saveProfileSettings(nextLanguage, notificationsEnabled);
-      setLanguage(nextLanguage);
+      await Promise.all([
+        saveProfileSettings(nextLanguage, notificationsEnabled),
+        changeLanguage(nextLanguage === 'HY' ? 'hy' : nextLanguage === 'RU' ? 'ru' : 'en'),
+      ]);
     } catch {
       setMessage(profileStrings.settings.saveError);
     }
@@ -261,7 +262,7 @@ export function ProfileScreen({
         return;
       }
 
-      await saveProfileSettings(language, isFirebaseEnabled);
+      await saveProfileSettings(activeLanguage, isFirebaseEnabled);
       setNotificationsEnabled(isFirebaseEnabled);
       setMessage('');
     } catch {
@@ -318,68 +319,68 @@ export function ProfileScreen({
     }
   };
 
-  const shareCurrentLocation = async () => {
-    try {
-      if (!locationEnabled) {
-        setMessage(profileStrings.settings.locationPermissionRequired);
-        return;
-      }
-      if (!NativeModules.RNFusedLocation) {
-        setMessage(profileStrings.settings.locationServiceUnavailable);
-        return;
-      }
-      const {default: Geolocation} = await import(
-        'react-native-geolocation-service'
-      );
+  // const shareCurrentLocation = async () => {
+  //   try {
+  //     if (!locationEnabled) {
+  //       setMessage(profileStrings.settings.locationPermissionRequired);
+  //       return;
+  //     }
+  //     if (!NativeModules.RNFusedLocation) {
+  //       setMessage(profileStrings.settings.locationServiceUnavailable);
+  //       return;
+  //     }
+  //     const {default: Geolocation} = await import(
+  //       'react-native-geolocation-service'
+  //     );
 
-      if (Platform.OS === 'android') {
-        const permission = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: profileStrings.settings.shareLocation,
-            message: profileStrings.settings.locationPermissionRequired,
-            buttonPositive: 'Allow',
-            buttonNegative: 'Not now',
-          },
-        );
-        if (permission !== PermissionsAndroid.RESULTS.GRANTED) {
-          setMessage(profileStrings.settings.locationPermissionRequired);
-          return;
-        }
-      } else if (
-        Platform.OS === 'ios' &&
-        (await Geolocation.requestAuthorization('whenInUse')) !== 'granted'
-      ) {
-        setMessage(profileStrings.settings.locationPermissionRequired);
-        return;
-      }
+  //     if (Platform.OS === 'android') {
+  //       const permission = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         {
+  //           title: profileStrings.settings.shareLocation,
+  //           message: profileStrings.settings.locationPermissionRequired,
+  //           buttonPositive: 'Allow',
+  //           buttonNegative: 'Not now',
+  //         },
+  //       );
+  //       if (permission !== PermissionsAndroid.RESULTS.GRANTED) {
+  //         setMessage(profileStrings.settings.locationPermissionRequired);
+  //         return;
+  //       }
+  //     } else if (
+  //       Platform.OS === 'ios' &&
+  //       (await Geolocation.requestAuthorization('whenInUse')) !== 'granted'
+  //     ) {
+  //       setMessage(profileStrings.settings.locationPermissionRequired);
+  //       return;
+  //     }
 
-      let position: GeoPosition;
-      try {
-        position = await new Promise<GeoPosition>((resolve, reject) => {
-          Geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 10000,
-          });
-        });
-      } catch (error) {
-        console.error('Could not retrieve current location.', error);
-        setMessage(profileStrings.settings.locationUnavailable);
-        return;
-      }
-      const mapUrl = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
-      await Share.share({
-        title: profileStrings.settings.shareLocationTitle,
-        message: `${profileStrings.settings.shareLocationTitle}: ${mapUrl}`,
-        url: mapUrl,
-      });
-      setMessage('');
-    } catch (error) {
-      console.error('Could not share current location.', error);
-      setMessage(profileStrings.settings.locationShareError);
-    }
-  };
+  //     let position: GeoPosition;
+  //     try {
+  //       position = await new Promise<GeoPosition>((resolve, reject) => {
+  //         Geolocation.getCurrentPosition(resolve, reject, {
+  //           enableHighAccuracy: true,
+  //           timeout: 15000,
+  //           maximumAge: 10000,
+  //         });
+  //       });
+  //     } catch (error) {
+  //       console.error('Could not retrieve current location.', error);
+  //       setMessage(profileStrings.settings.locationUnavailable);
+  //       return;
+  //     }
+  //     const mapUrl = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+  //     await Share.share({
+  //       title: profileStrings.settings.shareLocationTitle,
+  //       message: `${profileStrings.settings.shareLocationTitle}: ${mapUrl}`,
+  //       url: mapUrl,
+  //     });
+  //     setMessage('');
+  //   } catch (error) {
+  //     console.error('Could not share current location.', error);
+  //     setMessage(profileStrings.settings.locationShareError);
+  //   }
+  // };
 
   const scrollFocusedInputIntoView = useCallback<NonNullable<TextInputProps['onFocus']>>(
     event => {
@@ -461,13 +462,13 @@ export function ProfileScreen({
             onInputFocus={scrollFocusedInputIntoView}
           />
           <SettingsList
-            language={language}
+            language={activeLanguage}
             notificationsEnabled={notificationsEnabled}
             locationEnabled={locationEnabled}
             onChangeLanguage={updateLanguage}
             onToggleNotifications={updateNotifications}
             onToggleLocation={updateLocationAccess}
-            onShareLocation={shareCurrentLocation}
+            // onShareLocation={shareCurrentLocation}
           />
         </>
       )}

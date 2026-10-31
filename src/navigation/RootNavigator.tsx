@@ -13,6 +13,7 @@ import {
 import {Compass, Home, Menu, Mic, UserRound, type LucideIcon} from 'lucide-react-native';
 import {colors} from '../config/theme';
 import {useProfile} from '../features/profile/context/ProfileProvider';
+import {useTranslation} from 'react-i18next';
 import {useVoiceAssistant} from '../components/VoiceAssistant';
 import {AppShell} from './AppShell';
 import type {
@@ -114,6 +115,14 @@ export function RootNavigator({onInitialComplete}: {onInitialComplete: () => voi
 
 function MainTabNavigator() {
   const {openAssistant, updatePageContext} = useVoiceAssistant();
+  const {t} = useTranslation();
+  const localizedTabLabels = {
+    Home: t('nav.home'),
+    Explore: t('nav.places'),
+    Food: t('nav.assistant'),
+    Menu: t('nav.menu'),
+    Profile: t('nav.profile'),
+  } as const;
 
   return (
     <Tab.Navigator
@@ -122,8 +131,8 @@ function MainTabNavigator() {
         headerShown: false,
         lazy: true,
         tabBarHideOnKeyboard: true,
-        tabBarLabel: tabLabels[route.name],
-        tabBarAccessibilityLabel: `${tabLabels[route.name]} tab`,
+        tabBarLabel: localizedTabLabels[route.name],
+        tabBarAccessibilityLabel: `${localizedTabLabels[route.name]} tab`,
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors.tabInactive,
         tabBarStyle: styles.tabBar,
@@ -551,14 +560,6 @@ const tabIcons: Record<keyof MainTabParamList, LucideIcon> = {
   Food: Mic,
   Menu,
   Profile: UserRound,
-};
-
-const tabLabels: Record<keyof MainTabParamList, string> = {
-  Home: 'Home',
-  Explore: 'Places',
-  Food: 'Assistant',
-  Menu: 'Menu',
-  Profile: 'Profile',
 };
 
 function createTabBarIcon(

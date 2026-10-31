@@ -3,12 +3,14 @@ import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {colors} from '../config/theme';
 import {navigationMenuItems} from '../navigation/menuItems';
 import type {AppScreen} from '../navigation/types';
+import {useTranslation} from 'react-i18next';
 
 type MenuScreenProps = {
   onNavigate: (screen: AppScreen) => void;
 };
 
 export function MenuScreen({onNavigate}: MenuScreenProps) {
+  const {t} = useTranslation();
 
   /**
    * 
@@ -24,7 +26,7 @@ export function MenuScreen({onNavigate}: MenuScreenProps) {
       <Text style={styles.eyebrow}>SYUNIK DREAMS</Text>
       {/* <Text style={styles.title}>Explore the app</Text> */}
       <Text style={styles.description}>
-        Choose wich on of the following sections you want to see. 
+        {t('menu.chooseSection')}
       </Text>
 
       <View style={styles.list}>
@@ -32,15 +34,15 @@ export function MenuScreen({onNavigate}: MenuScreenProps) {
           <Pressable
             key={item.key}
             accessibilityRole="button"
-            accessibilityLabel={`${item.label}. ${item.description}`}
+            accessibilityLabel={`${localizedMenuLabel(item.key, t)}. ${localizedMenuDescription(item.key, t)}`}
             style={({pressed}) => [styles.menuItem, pressed && styles.menuItemPressed]}
             onPress={() => onNavigate(item.key)}>
             <View style={styles.iconWrap}>
               <Text style={styles.icon}>{item.icon}</Text>
             </View>
             <View style={styles.textContent}>
-              <Text style={styles.label}>{item.label}</Text>
-              <Text style={styles.itemDescription}>{item.description}</Text>
+              <Text style={styles.label}>{localizedMenuLabel(item.key, t)}</Text>
+              <Text style={styles.itemDescription}>{localizedMenuDescription(item.key, t)}</Text>
             </View>
             <Text accessibilityElementsHidden style={styles.arrow}>›</Text>
           </Pressable>
@@ -48,6 +50,14 @@ export function MenuScreen({onNavigate}: MenuScreenProps) {
       </View>
     </ScrollView>
   );
+}
+
+function localizedMenuLabel(key: AppScreen, t: (key: string) => string) {
+  return t(`nav.${key === 'myTrips' ? 'myTrips' : key}`);
+}
+
+function localizedMenuDescription(key: AppScreen, t: (key: string) => string) {
+  return t(`nav.${key === 'myTrips' ? 'myTrips' : key}Description`);
 }
 
 const styles = StyleSheet.create({
