@@ -41,3 +41,4 @@ Tourism app with maps, push notifications, and voice AI.
 - Don't add dependencies without asking.
 - After changes, run typecheck and lint and fix errors before finishing.
 - If the request is ambiguous, ask one short question instead of guessing.
+- Don't read or search `vendor`, `ios/Pods`, `android/build`, `node_modules`, `build.log`, or lock files.

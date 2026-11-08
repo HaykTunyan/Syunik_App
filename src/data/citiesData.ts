@@ -37,7 +37,7 @@ export const citiesData: CityData[] = [
     founding: '1870',
     coords: [39.5126, 46.3382],
     image: require('../assets/images/goris_city.png'),
-    placeIds: ['tatev-monastery', 'khndzoresk', 'goris-cave-city', 'goris-rock-formations'],
+    placeIds: ['tatev-monastery', 'khndzoresk', 'goris-cave-city', 'goris-rock-formations', 'verishen', 'shinuhayr', 'old-khot', 'old-harzhis', 'old-halidzor'],
   },
   {
     id: 'sisian',

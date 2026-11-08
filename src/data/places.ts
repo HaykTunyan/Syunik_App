@@ -49,7 +49,7 @@ export interface Place {
   website?: string;
   bestTimeToVisit?: string;
   difficulty?: 'easy' | 'moderate' | 'hard';
-  priority?: 'recommended' | 'optional';
+  priority?: 'must_visit' | 'recommended' | 'hidden_gem' | 'optional';
   createdAt?: string;
   coordinatesStatus?: 'verified' | 'incomplete';
   image: ImageSourcePropType;
@@ -65,11 +65,11 @@ const corePlaces: Place[] = [
     coordinates: {latitude: 39.379367, longitude: 46.250031}, address: 'Tatev, Syunik Province', bestTimeToVisit: 'Late spring to early autumn', coordinatesStatus: 'verified',
   },
   {
-    id: 'khndzoresk', name: 'Khndzoresk Cave Village', cityId: 'goris', cityName: 'Goris', category: 'adventure', tags: ['caves', 'hiking', 'heritage'], recommendedDuration: 90, difficulty: 'moderate',
+    id: 'khndzoresk', name: 'Khndzoresk Cave Village', type: 'village', cityId: 'goris', cityName: 'Goris', category: 'history', priority: 'must_visit', tags: ['village', 'history', 'cave-dwellings', 'hiking', 'adventure', 'nature', 'heritage', 'swinging-bridge'], recommendedDuration: 120, difficulty: 'moderate',
     shortDescription: 'Cave dwellings and a historic swinging bridge.',
     description: 'Walk through the canyon of old Khndzoresk to discover cave homes, rock formations, and the famous hanging bridge.',
     image: require('../assets/images/for-travel/khndzoresk_caves.png'), gallery: [require('../assets/images/for-travel/khndzoresk.png'), require('../assets/images/for-travel/khndzoresk_caves.png')],
-    coordinates: {latitude: 39.51222, longitude: 46.43361}, address: 'Khndzoresk, Syunik Province', bestTimeToVisit: 'Late spring to early autumn', coordinatesStatus: 'verified',
+    coordinates: {latitude: 39.5051, longitude: 46.4373}, address: 'Old Khndzoresk cave village, Syunik Province', bestTimeToVisit: 'Late spring to early autumn', coordinatesStatus: 'verified',
   },
   {
     id: 'devils-bridge', name: "Devil's Bridge", cityId: 'tatev', cityName: 'Tatev area', category: 'nature', tags: ['nature', 'gorge', 'springs'], recommendedDuration: 60, difficulty: 'moderate',
@@ -147,6 +147,26 @@ const additionalPlaces: Place[] = [
     shortDescription: 'The pedestrian bridge crossing the Khndzoresk gorge.', description: 'A walking bridge connecting the paths through the historic Khndzoresk cave settlement.', tags: ['bridge', 'caves', 'hiking'], recommendedDuration: 45, image: require('../assets/images/for-travel/khndzoresk.png'), gallery: [require('../assets/images/for-travel/khndzoresk.png')], coordinatesStatus: 'incomplete', difficulty: 'moderate',
   },
   {
+    id: 'verishen', name: 'Verishen', type: 'village', cityId: 'goris', cityName: 'Goris area', category: 'history', priority: 'recommended',
+    shortDescription: 'A historic village near Goris with religious heritage.', description: 'Verishen is a traditional Syunik settlement close to Goris, known for its historic village character, natural surroundings, and St. Hripsime Church.', tags: ['village', 'history', 'church', 'heritage', 'culture', 'nature'], recommendedDuration: 75, image: require('../assets/images/syunik_landscape.png'), gallery: [require('../assets/images/syunik_landscape.png')], coordinates: {latitude: 39.53583, longitude: 46.31194}, coordinatesStatus: 'verified', difficulty: 'easy', bestTimeToVisit: 'Late spring to early autumn',
+  },
+  {
+    id: 'shinuhayr', name: 'Shinuhayr', type: 'village', cityId: 'goris', cityName: 'Goris area', category: 'culture', priority: 'recommended',
+    shortDescription: 'A historic village and gateway to the Tatev area.', description: 'Shinuhayr combines village life, historic heritage, and mountain scenery along the southern Goris route toward Tatev and the Vorotan gorge.', tags: ['village', 'culture', 'history', 'heritage', 'mountains', 'tatev-route'], recommendedDuration: 90, image: require('../assets/images/for-travel/tatev.png'), gallery: [require('../assets/images/for-travel/tatev.png')], coordinates: {latitude: 39.43417, longitude: 46.31556}, coordinatesStatus: 'verified', difficulty: 'easy', bestTimeToVisit: 'Late spring to early autumn',
+  },
+  {
+    id: 'old-khot', name: 'Old Khot', type: 'attraction', cityId: 'goris', cityName: 'Goris area', category: 'history', priority: 'hidden_gem',
+    shortDescription: 'A hidden historic settlement with cave dwellings and old village remains.', description: 'Old Khot is an abandoned mountain settlement with cave dwellings, medieval village remains, churches, and archaeological traces for travelers seeking a quiet hidden-gem experience.', tags: ['historic-settlement', 'old-village', 'cave-dwellings', 'history', 'heritage', 'hiking', 'nature', 'hidden-gem'], recommendedDuration: 120, image: require('../assets/images/for-travel/khot.png'), gallery: [require('../assets/images/for-travel/khot.png')], coordinates: {latitude: 39.44, longitude: 46.3361}, coordinatesStatus: 'verified', difficulty: 'moderate', bestTimeToVisit: 'Late spring to early autumn',
+  },
+  {
+    id: 'old-harzhis', name: 'Old Harzhis', type: 'attraction', cityId: 'goris', cityName: 'Goris area', category: 'history', priority: 'hidden_gem',
+    shortDescription: 'An atmospheric historic settlement with old village remains.', description: 'Old Harzhis preserves an ancient village environment with cave dwellings, cultural heritage, mountain scenery, and quiet hiking routes for travelers seeking a hidden-gem experience.', tags: ['historic-settlement', 'old-village', 'cave-dwellings', 'history', 'heritage', 'nature', 'hiking', 'hidden-gem'], recommendedDuration: 90, image: require('../assets/images/for-travel/old-harzhis-view.png'), gallery: [require('../assets/images/for-travel/old-harzhis-view.png')], coordinates: {latitude: 39.4265544, longitude: 46.2248277}, coordinatesStatus: 'verified', difficulty: 'moderate', bestTimeToVisit: 'Late spring to early autumn',
+  },
+  {
+    id: 'old-halidzor', name: 'Old Halidzor', type: 'attraction', cityId: 'goris', cityName: 'Goris area', category: 'history', priority: 'recommended',
+    shortDescription: 'A historic mountain settlement with traditional stone houses.', description: 'Old Halidzor is a distinct historic settlement with traditional stone houses, village character, mountain scenery, and quiet routes for nature walks and cultural heritage exploration.', tags: ['historic-settlement', 'old-village', 'stone-houses', 'history', 'heritage', 'nature', 'hiking', 'mountains'], recommendedDuration: 90, image: require('../assets/images/for-travel/halidzor.png'), gallery: [require('../assets/images/for-travel/halidzor.png')], coordinates: {latitude: 39.40627, longitude: 46.2925}, coordinatesStatus: 'verified', difficulty: 'moderate', bestTimeToVisit: 'Late spring to early autumn',
+  },
+  {
     id: 'goris-cave-city', name: 'Goris Cave City', cityId: 'goris', cityName: 'Goris', category: 'history',
     shortDescription: 'Historic cave dwellings around Goris.', description: 'The cave-city landscape preserves the region’s historic relationship with its volcanic rock formations.', tags: ['caves', 'history', 'photography'], recommendedDuration: 75, image: require('../assets/images/goris/goris_rock_forest_ai.png'), gallery: [require('../assets/images/goris/goris_rock_forest_ai.png')], coordinatesStatus: 'incomplete',
   },
@@ -156,7 +176,7 @@ const additionalPlaces: Place[] = [
   },
   {
     id: 'goris-viewpoint', name: 'Goris Valley Viewpoint', cityId: 'goris', cityName: 'Goris', category: 'nature',
-    shortDescription: 'A scenic overlook across Goris and the surrounding mountains.', description: 'A viewpoint entry is reserved for a confirmed public access point around the Goris valley.', tags: ['viewpoint', 'mountains', 'photography'], recommendedDuration: 30, image: require('../assets/images/syunik_view.png'), gallery: [require('../assets/images/syunik_view.png')], coordinatesStatus: 'incomplete',
+    shortDescription: 'A scenic overlook across Goris and the surrounding mountains.', description: 'A viewpoint entry is reserved for a confirmed public access point around the Goris valley.', tags: ['viewpoint', 'mountains', 'photography'], recommendedDuration: 30, image: require('../assets/images/syunik'), gallery: [require('../assets/images/syunik_landscape.png')], coordinatesStatus: 'incomplete',
   },
   // Tatev
   {
@@ -245,7 +265,7 @@ const additionalPlaces: Place[] = [
   },
   {
     id: 'sisian-viewpoint', name: 'Sisian Plateau Viewpoint', cityId: 'sisian', cityName: 'Sisian', category: 'nature',
-    shortDescription: 'Open views across the Sisian plateau.', description: 'A viewpoint entry is reserved for a confirmed public overlook around Sisian.', tags: ['viewpoint', 'plateau', 'photography'], recommendedDuration: 30, image: require('../assets/images/syunik_view.png'), gallery: [require('../assets/images/syunik_view.png')], coordinatesStatus: 'incomplete',
+    shortDescription: 'Open views across the Sisian plateau.', description: 'A viewpoint entry is reserved for a confirmed public overlook around Sisian.', tags: ['viewpoint', 'plateau', 'photography'], recommendedDuration: 30, image: require('../assets/images/syunik_landscape.png'), gallery: [require('../assets/images/syunik_landscape.png')], coordinatesStatus: 'incomplete',
   },
   {
     id: 'ughtasar', name: 'Mount Ughtasar', cityId: 'sisian', cityName: 'Sisian', category: 'adventure',

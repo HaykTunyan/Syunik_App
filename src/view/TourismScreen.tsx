@@ -133,7 +133,7 @@ export const topVisitingVillages: VillageSpot[] = [
     gallery: [
       require('../assets/images/for-travel/halidzor.png'),
       require('../assets/images/for-travel/halizdor-view.png'),
-      require('../assets/images/syunik_view.png'),
+      require('../assets/images/syunik_landscape.png'),
     ],
     placeIds: ['halidzor-fortress'],
   },
