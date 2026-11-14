@@ -28,7 +28,6 @@ export function ContactUsScreen({onBack}: ContactUsScreenProps) {
         </Pressable>
 
         <Text style={styles.title}>Contact Us</Text>
-
         <Text style={styles.body}>
           We would love to hear from you. Whether you have a question, a travel
           suggestion, or a partnership idea, our team is here to help.

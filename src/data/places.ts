@@ -176,7 +176,7 @@ const additionalPlaces: Place[] = [
   },
   {
     id: 'goris-viewpoint', name: 'Goris Valley Viewpoint', cityId: 'goris', cityName: 'Goris', category: 'nature',
-    shortDescription: 'A scenic overlook across Goris and the surrounding mountains.', description: 'A viewpoint entry is reserved for a confirmed public access point around the Goris valley.', tags: ['viewpoint', 'mountains', 'photography'], recommendedDuration: 30, image: require('../assets/images/syunik'), gallery: [require('../assets/images/syunik_landscape.png')], coordinatesStatus: 'incomplete',
+    shortDescription: 'A scenic overlook across Goris and the surrounding mountains.', description: 'A viewpoint entry is reserved for a confirmed public access point around the Goris valley.', tags: ['viewpoint', 'mountains', 'photography'], recommendedDuration: 30, image: require('../assets/images/syunik_landscape.png'), gallery: [require('../assets/images/syunik_landscape.png')], coordinatesStatus: 'incomplete',
   },
   // Tatev
   {
@@ -240,7 +240,7 @@ const additionalPlaces: Place[] = [
   // Meghri
   {
     id: 'meghri-fortress', name: 'Meghri Fortress', cityId: 'meghri', cityName: 'Meghri', category: 'history',
-    shortDescription: 'An historic fortress overlooking Meghri.', description: 'Meghri Fortress stands on a hill above the old section of the town.', tags: ['fortress', 'heritage', 'viewpoint'], recommendedDuration: 60, image: require('../assets/images/meghri/Meghri_Fortress-ai.jpg'), gallery: [require('../assets/images/meghri/Meghri_Fortress-ai.jpg')], coordinates: {latitude: 38.90222, longitude: 46.24833}, coordinatesStatus: 'verified', difficulty: 'moderate',
+    shortDescription: 'An historic fortress overlooking Meghri.', description: 'Meghri Fortress stands on a hill above the old section of the town.', tags: ['fortress', 'heritage', 'viewpoint'], recommendedDuration: 60, image: require('../assets/images/meghri/meghri_fortress-ai.jpg'), gallery: [require('../assets/images/meghri/meghri_fortress-ai.jpg')], coordinates: {latitude: 38.90222, longitude: 46.24833}, coordinatesStatus: 'verified', difficulty: 'moderate',
   },
   {
     id: 'st-hovhannes-meghri', name: 'St. Hovhannes Church', cityId: 'meghri', cityName: 'Meghri', category: 'history',

@@ -15,7 +15,7 @@
     "@gorhom/bottom-sheet": "^5.2.14",
     "@livekit/react-native": "^2.12.0",
     "@livekit/react-native-webrtc": "^144.1.2",
-    "@react-native-async-storage/async-storage": "^3.1.1",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/cli-platform-apple": "^20.2.0",
     "@react-native-community/datetimepicker": "^9.2.1",
     "@react-native-firebase/app": "^26.4.0",
